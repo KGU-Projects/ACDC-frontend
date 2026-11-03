@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-10">
     <div class="w-full max-w-[400px]">
-      <div class="mb-6"><BrandMark /></div>
+      <div class="mb-8"><BrandMark size="lg" /></div>
 
       <div class="rounded-card border border-line bg-surface p-6 sm:p-8">
         <h1 class="text-[24px] font-semibold leading-8 text-ink">회원가입</h1>

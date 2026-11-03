@@ -8,7 +8,7 @@
     ]"
     :aria-current="active ? 'page' : undefined"
   >
-    <AppIcon :name="item.icon" :size="16" />
+    <AppIcon :name="item.icon" :size="16" :class="active ? 'text-accent' : ''" />
     <span class="flex-1">{{ item.label }}</span>
     <span
       v-if="badge"

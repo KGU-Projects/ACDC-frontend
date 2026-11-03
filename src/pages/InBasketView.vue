@@ -7,7 +7,7 @@
 
     <template v-else-if="session">
       <header class="sticky top-0 z-30 flex min-h-12 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-surface px-4 py-1.5 lg:static">
-        <BrandMark class="hidden shrink-0 sm:inline-flex" />
+        <BrandMark size="sm" class="hidden shrink-0 sm:inline-flex" />
         <div class="min-w-0 flex-1 basis-40">
           <h1 class="truncate text-[14px] font-medium leading-5 text-ink">{{ session.scenarioTitle }}</h1>
           <p class="truncate text-[12px] leading-4 text-muted" aria-live="polite">서류함<span v-if="saveState"> · {{ saveState }}</span></p>

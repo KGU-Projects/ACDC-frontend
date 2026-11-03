@@ -25,6 +25,9 @@ export default {
         primary: 'var(--primary)',
         primaryHover: 'var(--primary-hover)',
         accent: 'var(--accent)',
+        accentTint: 'var(--accent-tint)',
+        accentLine: 'var(--accent-line)',
+        topbar: 'var(--topbar)',
         positive: 'var(--positive)',
         negative: 'var(--negative)',
         /* 통화·숙지 화면의 어두운 무대 색 */

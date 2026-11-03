@@ -1,7 +1,7 @@
 <template>
   <article class="flex flex-col rounded-card border border-line bg-surface p-5">
     <div class="flex items-center justify-between gap-3">
-      <StatusPill :label="typeLabel(scenario.type)" tone="neutral" />
+      <StatusPill :label="typeLabel(scenario.type)" :tone="scenario.type === 'ROLE_PLAY' ? 'accent' : 'neutral'" />
       <span class="text-[12px] text-muted tabular-nums">{{ timeText }}</span>
     </div>
     <h3 class="mt-3 text-[16px] font-semibold leading-6 text-ink">{{ scenario.title }}</h3>

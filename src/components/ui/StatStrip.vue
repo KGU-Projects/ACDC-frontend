@@ -11,7 +11,7 @@
     >
       <div class="text-[12px] text-muted">{{ item.label }}</div>
       <div class="mt-1 text-[28px] font-semibold leading-9 tabular-nums"
-           :class="item.value === '–' ? 'text-faint' : 'text-ink'">
+           :class="item.value === '–' ? 'text-faint' : item.accent ? 'text-accent' : 'text-ink'">
         {{ item.value }}<span v-if="item.suffix" class="ml-1 text-[14px] font-normal text-muted">{{ item.suffix }}</span>
       </div>
     </div>

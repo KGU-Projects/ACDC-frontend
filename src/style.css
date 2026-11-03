@@ -13,6 +13,9 @@
   --primary: #1b2a3d;       /* 기본 버튼 */
   --primary-hover: #121e2d;
   --accent: #2a7a72;        /* 데이터·선택 상태에만 쓰는 청록 */
+  --accent-tint: #edf5f3;   /* 주의를 끄는 띠의 옅은 청록 바탕 */
+  --accent-line: #bfdcd6;   /* 위 바탕의 1px 테두리 */
+  --topbar: #ffffff;        /* 상단 바 */
   --positive: #1b6a43;
   --negative: #b42318;
 

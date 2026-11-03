@@ -8,7 +8,7 @@
     <div v-else-if="session" class="flex flex-1 flex-col lg:min-h-0">
       <header class="flex h-12 items-center justify-between gap-3 px-4" :class="phase === 'call' ? 'fixed inset-x-0 top-0 z-50 bg-stage/80 text-white' : 'sticky top-0 z-30 border-b border-line bg-surface'">
         <div class="flex min-w-0 items-center gap-4">
-          <BrandMark v-if="phase !== 'call'" class="hidden shrink-0 sm:inline-flex" />
+          <BrandMark size="sm" v-if="phase !== 'call'" class="hidden shrink-0 sm:inline-flex" />
           <div class="min-w-0">
             <h1 class="truncate text-[14px] font-medium leading-5" :class="phase === 'call' ? 'text-white' : 'text-ink'">{{ session.scenarioTitle }}</h1>
             <p class="truncate text-[12px] leading-4" :class="phase === 'call' ? 'text-white/75' : 'text-muted'">역할수행 · 상대역 {{ counterpart.name }} {{ counterpart.position }}</p>

@@ -3,7 +3,7 @@
     <PageHeader title="평가 홈" :subtitle="subtitle" />
 
     <div v-if="loading" class="mb-6 h-[62px]" aria-hidden="true"></div>
-    <div v-else-if="current" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface px-4 py-3">
+    <div v-else-if="current" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-accentLine bg-accentTint px-4 py-3">
       <div class="min-w-0">
         <div class="text-[12px] text-muted">이어서 진행하기{{ counts.inProgress > 1 ? ` · 진행 중 ${counts.inProgress}건` : '' }}</div>
         <div class="truncate text-[14px] font-medium text-ink">{{ current.scenarioTitle }}</div>
@@ -21,7 +21,7 @@
 
     <section v-if="!loadFailed" class="mt-8" aria-labelledby="home-tasks">
       <div class="mb-3 flex items-baseline justify-between gap-3">
-        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제</h2>
+        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제<span v-if="!loading && scenarios.length" class="ml-1.5 text-[13px] font-medium text-accent">{{ scenarios.length }}</span></h2>
         <RouterLink to="/tasks" class="-my-3 inline-flex min-h-11 items-center py-3 text-[13px] text-muted hover:text-ink hover:underline md:my-0 md:min-h-0 md:py-0">전체 보기</RouterLink>
       </div>
       <ListPlaceholder v-if="loading" variant="cards" :count="2" />
@@ -79,9 +79,9 @@ const loaded = computed(() => !loading.value && !loadFailed.value);
 const show = (n) => (loaded.value ? n : '–');
 const stats = computed(() => [
   { label: '응시 가능한 과제', value: show(counts.value.available) },
-  { label: '진행 중', value: show(counts.value.inProgress) },
+  { label: '진행 중', value: show(counts.value.inProgress), accent: counts.value.inProgress > 0 },
   { label: '채점·검토 중', value: show(counts.value.reviewing) },
-  { label: '결과 확인 가능', value: show(counts.value.ready) }
+  { label: '결과 확인 가능', value: show(counts.value.ready), accent: counts.value.ready > 0 }
 ]);
 
 const subtitle = computed(() => {
