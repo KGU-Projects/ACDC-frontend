@@ -115,6 +115,7 @@ const load = async () => {
 };
 
 let pollTimer = null;
+let unmounted = false;
 const stopPolling = () => {
   if (pollTimer) {
     clearInterval(pollTimer);
@@ -130,6 +131,7 @@ const refreshSessions = async () => {
   syncPolling();
 };
 const syncPolling = () => {
+  if (unmounted) return;
   const needed = sessions.value.some((s) => isPolling(s.stage));
   if (needed && !pollTimer) pollTimer = setInterval(refreshSessions, 30000);
   else if (!needed) stopPolling();
@@ -161,5 +163,8 @@ const handleLogout = async () => {
 };
 
 onMounted(load);
-onBeforeUnmount(stopPolling);
+onBeforeUnmount(() => {
+  unmounted = true;
+  stopPolling();
+});
 </script>

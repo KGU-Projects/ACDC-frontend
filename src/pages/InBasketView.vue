@@ -17,7 +17,7 @@
             {{ leaving ? '저장 중...' : '임시 저장 후 나가기' }}
           </button>
           <button @click="submit" :disabled="submitting || leaving" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-            {{ submitting ? '채점 중...' : '제출' }}
+            {{ submitting ? '제출 중...' : '제출' }}
           </button>
         </div>
       </header>
