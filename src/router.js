@@ -7,6 +7,7 @@ import LoginView from './pages/LoginView.vue';
 import InBasketView from './pages/InBasketView.vue';
 import RolePlayView from './pages/RolePlayView.vue';
 import ResultView from './pages/ResultView.vue';
+import SubmittedView from './pages/SubmittedView.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/home', name: 'home', component: HomeView, meta: { requiresAuth: true } },
   { path: '/inbasket/:id', name: 'inbasket', component: InBasketView, meta: { requiresAuth: true } },
   { path: '/roleplay/:id', name: 'roleplay', component: RolePlayView, meta: { requiresAuth: true } },
+  { path: '/submitted', name: 'submitted', component: SubmittedView, meta: { requiresAuth: true } },
   { path: '/result/:id', name: 'result', component: ResultView, meta: { requiresAuth: true } },
 
   { path: '/:pathMatch(.*)*', redirect: '/login' }
