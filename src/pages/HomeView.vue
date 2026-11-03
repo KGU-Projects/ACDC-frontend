@@ -6,6 +6,7 @@
         <div class="text-xl font-extrabold text-slate-800 tracking-tight">AC/DC</div>
         <div class="flex items-center gap-3">
           <span class="text-xs text-slate-500 font-medium">{{ user?.name }}<span v-if="user?.role === 'FT'" class="ml-1 text-brand font-bold">(FT)</span></span>
+          <button v-if="user?.role === 'FT'" @click="router.push('/ft/review')" class="text-xs font-bold text-brand">FT 검토</button>
           <button @click="handleLogout" class="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors">로그아웃</button>
         </div>
       </div>

@@ -8,6 +8,8 @@ import InBasketView from './pages/InBasketView.vue';
 import RolePlayView from './pages/RolePlayView.vue';
 import ResultView from './pages/ResultView.vue';
 import SubmittedView from './pages/SubmittedView.vue';
+import ReviewView from './pages/ReviewView.vue';
+import { getStoredUser } from './api/auth';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -21,6 +23,7 @@ const routes = [
   { path: '/roleplay/:id', name: 'roleplay', component: RolePlayView, meta: { requiresAuth: true } },
   { path: '/submitted', name: 'submitted', component: SubmittedView, meta: { requiresAuth: true } },
   { path: '/result/:id', name: 'result', component: ResultView, meta: { requiresAuth: true } },
+  { path: '/ft/review', name: 'ft-review', component: ReviewView, meta: { requiresAuth: true, requiresFT: true } },
 
   { path: '/:pathMatch(.*)*', redirect: '/login' }
 ];
@@ -35,6 +38,10 @@ router.beforeEach((to) => {
 
   if (to.meta.requiresAuth && !hasAccessToken) {
     return '/login';
+  }
+
+  if (to.meta.requiresFT && getStoredUser()?.role !== 'FT') {
+    return '/home';
   }
 
   if ((to.name === 'login' || to.name === 'signup') && hasAccessToken) {
