@@ -127,18 +127,22 @@ const saveAndLeave = async () => {
   if (leaving.value || submitting.value) return;
   leaving.value = true;
   errorMessage.value = '';
+  stopCountdown(); // 저장·정지 도중 시간 만료 자동 제출이 끼어들지 않게 먼저 멈춘다.
+  const resumeCountdown = () => {
+    leaving.value = false;
+    startCountdown(remaining.value, submit);
+  };
   try {
     if (!(await flushSave())) {
-      leaving.value = false;
+      resumeCountdown();
       return;
     }
-    stopCountdown();
     await pauseSession(sessionId);
     paused = true;
     router.push('/home');
   } catch (error) {
     errorMessage.value = error.message || '임시 저장에 실패했습니다.';
-    leaving.value = false;
+    resumeCountdown();
   }
 };
 
@@ -149,7 +153,7 @@ const scheduleSave = () => {
 };
 
 const submit = async () => {
-  if (submitting.value) return;
+  if (submitting.value || leaving.value) return;
   if (!answer.value.trim()) {
     errorMessage.value = '답안을 작성한 뒤 제출해주세요.';
     return;
