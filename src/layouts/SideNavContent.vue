@@ -1,8 +1,8 @@
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
-    <nav aria-label="주 메뉴" class="flex-1 overflow-y-auto px-3 pb-4 pt-4">
-      <div v-for="(group, gi) in groups" :key="group.label" :class="gi ? 'mt-5' : ''">
-        <div :id="`${idPrefix}-${gi}`" class="mb-1 px-3 text-[12px] text-faint">{{ group.label }}</div>
+    <nav aria-label="주 메뉴" class="flex-1 overflow-y-auto px-3 pb-4 pt-6">
+      <div v-for="(group, gi) in groups" :key="group.label" :class="gi ? 'mt-6' : ''">
+        <div :id="`${idPrefix}-${gi}`" class="mb-1.5 px-3 text-[12px] text-faint">{{ group.label }}</div>
         <ul class="space-y-0.5" :aria-labelledby="`${idPrefix}-${gi}`">
           <li v-for="item in group.items" :key="item.to">
             <NavRow :item="item" :active="isActive(item)" :badge="badgeFor(item)" :mobile="mobile" />

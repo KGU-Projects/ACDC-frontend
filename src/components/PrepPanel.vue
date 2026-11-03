@@ -25,12 +25,12 @@
         <p v-if="requesting" class="mt-3 text-center text-[13px] text-muted">카메라와 마이크를 확인하는 중...</p>
         <div v-if="mediaError" class="mt-3 text-center" role="alert">
           <p class="text-[13px] leading-5 text-negative">{{ mediaError }}</p>
-          <button @click="emit('retry-media')" :disabled="requesting" class="mt-2 h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-9">다시 요청</button>
+          <button @click="emit('retry-media')" :disabled="requesting" class="mt-2 h-11 rounded-control btn-2 px-4 text-[14px] font-medium text-ink disabled:opacity-50 md:h-9">다시 요청</button>
         </div>
         <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <button @click="emit('start')" :disabled="!canStart" class="h-11 rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 md:h-10">역할 수행 시작</button>
-          <button @click="emit('leave')" :disabled="!canStart" class="h-11 rounded-control border border-control bg-surface px-5 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-10">홈으로</button>
-          <button v-if="showSkip" @click="emit('skip')" :disabled="!canStart" class="h-11 rounded-control border border-control bg-surface px-5 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-10">건너뛰기</button>
+          <button @click="emit('leave')" :disabled="!canStart" class="h-11 rounded-control btn-2 px-5 text-[14px] font-medium text-ink disabled:opacity-50 md:h-10">홈으로</button>
+          <button v-if="showSkip" @click="emit('skip')" :disabled="!canStart" class="h-11 rounded-control btn-2 px-5 text-[14px] font-medium text-ink disabled:opacity-50 md:h-10">건너뛰기</button>
         </div>
       </div>
 

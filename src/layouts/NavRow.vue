@@ -3,12 +3,12 @@
     :to="item.to"
     class="flex items-center gap-2.5 rounded-control px-3 text-[14px]"
     :class="[
-      mobile ? 'h-11' : 'h-9',
-      active ? 'bg-line font-medium text-ink' : 'text-muted hover:bg-hover hover:text-ink'
+      mobile ? 'h-11' : 'h-8',
+      active ? 'bg-active font-medium text-ink' : 'text-muted hover:bg-hover hover:text-ink'
     ]"
     :aria-current="active ? 'page' : undefined"
   >
-    <AppIcon :name="item.icon" :size="16" :class="active ? 'text-accent' : ''" />
+    <AppIcon :name="item.icon" :size="16" :class="active ? 'text-ink' : ''" />
     <span class="flex-1">{{ item.label }}</span>
     <span
       v-if="badge"

@@ -2,14 +2,14 @@
   <div>
     <PageHeader title="평가 과제" :subtitle="loading ? '' : `응시할 수 있는 과제 ${scenarios.length}건`" />
 
-    <div class="mb-5 flex flex-wrap items-center gap-3">
-      <div class="inline-flex rounded-control border border-control bg-surface p-0.5" role="group" aria-label="과제 유형">
+    <div class="mb-4 flex flex-wrap items-center gap-3">
+      <div class="inline-flex rounded-control bg-secondary p-0.5" role="group" aria-label="과제 유형">
         <button
           v-for="opt in typeOptions"
           :key="opt.value"
           type="button"
-          class="h-11 rounded-[4px] border px-3 text-[14px] md:h-9"
-          :class="typeFilter === opt.value ? 'border-control bg-ground font-semibold text-ink' : 'border-transparent text-muted hover:text-ink'"
+          class="h-11 rounded-[4px] px-3 text-[14px] md:h-8"
+          :class="typeFilter === opt.value ? 'bg-surface font-medium text-ink' : 'text-muted hover:text-ink'"
           :aria-pressed="typeFilter === opt.value"
           @click="typeFilter = opt.value"
         >{{ opt.label }}</button>
@@ -20,7 +20,7 @@
           v-model="query"
           type="search"
           placeholder="과제명 검색"
-          class="field-input h-11 w-full md:h-10 rounded-control border border-control bg-surface px-3 text-[14px] text-ink placeholder:text-faint"
+          class="field-input h-11 w-full md:h-9 rounded-control border border-control bg-surface px-3 text-[14px] text-ink placeholder:text-faint"
         />
       </label>
     </div>
@@ -29,8 +29,8 @@
     <LoadError v-else-if="loadFailed" @retry="refresh" />
     <EmptyState v-else-if="!scenarios.length" message="등록된 평가 과제가 없습니다." />
     <EmptyState v-else-if="!filtered.length" message="조건에 맞는 과제가 없습니다." />
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <ScenarioCard v-for="s in filtered" :key="s.id" :scenario="s" :info="infoOf(s.id)" @start="begin" />
+    <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <ScenarioCard v-for="s in filtered" :key="s.id" :scenario="s" :info="infoOf(s.id)" :sessions="sessions" @start="begin" />
     </div>
 
     <StartModal :scenario="target" :sessions="sessions" :starting="starting" :error="errorMessage" @close="closeModal" @confirm="(mode) => start(target, mode)" />

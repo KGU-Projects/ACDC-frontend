@@ -9,7 +9,7 @@
         <form class="mt-6" @submit.prevent="handleLogin">
           <div class="mb-4">
             <label for="email" class="field-label">이메일</label>
-            <input v-model="email" type="email" id="email" class="field-input" placeholder="user@example.com" autocomplete="email" :disabled="isSubmitting" required>
+            <input v-model="email" type="email" id="email" class="field-input" autocomplete="email" :disabled="isSubmitting" required>
           </div>
 
           <div class="mb-5">

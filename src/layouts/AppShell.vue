@@ -5,7 +5,7 @@
       <RouterLink to="/home" class="flex items-center" aria-label="AC/DC 평가 홈으로"><BrandMark /></RouterLink>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-rail text-[13px] font-medium text-ink" aria-hidden="true">{{ initial }}</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-active text-[13px] font-medium text-ink" aria-hidden="true">{{ initial }}</span>
           <div class="leading-tight">
             <div class="text-[14px] font-medium text-ink">{{ user?.name || '사용자' }}</div>
             <div class="text-[12px] text-muted">{{ roleLabel }}</div>
@@ -13,7 +13,7 @@
         </div>
         <button
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-control text-muted hover:bg-rail hover:text-ink"
+          class="flex h-9 w-9 items-center justify-center rounded-control text-muted hover:bg-hover hover:text-ink"
           aria-label="로그아웃"
           title="로그아웃"
           @click="handleLogout"
@@ -28,7 +28,7 @@
       <RouterLink to="/home" class="flex h-11 items-center" aria-label="AC/DC 평가 홈으로"><BrandMark size="sm" /></RouterLink>
       <button
         type="button"
-        class="-mr-2 flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-rail"
+        class="-mr-2 flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-hover"
         ref="menuButton"
         aria-label="메뉴 열기"
         :aria-expanded="sheetOpen"
@@ -39,12 +39,12 @@
     </header>
 
     <!-- 모바일 전체 시트 -->
-    <div v-if="sheetOpen" ref="sheet" class="fixed inset-0 z-40 flex flex-col bg-rail md:hidden" role="dialog" aria-modal="true" aria-label="메뉴" tabindex="-1" @keydown="onSheetKeydown">
+    <div v-if="sheetOpen" ref="sheet" class="fixed inset-0 z-40 flex flex-col bg-ground md:hidden" role="dialog" aria-modal="true" aria-label="메뉴" tabindex="-1" @keydown="onSheetKeydown">
       <div class="flex h-12 shrink-0 items-center justify-between border-b border-line bg-topbar px-4">
         <BrandMark size="sm" />
         <button
           type="button"
-          class="-mr-2 flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-rail"
+          class="-mr-2 flex h-11 w-11 items-center justify-center rounded-control text-ink hover:bg-hover"
           aria-label="메뉴 닫기"
           @click="sheetOpen = false"
         >
@@ -56,12 +56,13 @@
 
     <div class="md:flex">
       <!-- 데스크톱 사이드바 (상단 바 아래) -->
-      <aside class="hidden border-r border-line bg-rail md:sticky md:top-16 md:flex md:h-[calc(100vh-4rem)] md:w-60 md:shrink-0 md:flex-col">
+      <aside class="hidden bg-rail md:sticky md:top-16 md:flex md:h-[calc(100vh-4rem)] md:w-64 md:shrink-0 md:flex-col">
         <SideNavContent :groups="groups" :is-active="isActive" :badge-for="badgeFor" />
       </aside>
 
       <main class="min-w-0 flex-1">
-        <div class="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-8">
+        <!-- 캔버스: 1440에서 1440 - 256(사이드바) - 2x32 = 1120px. 카드 간격은 하나(12px). -->
+        <div class="w-full max-w-[1280px] px-4 pb-12 pt-6 md:px-8 md:pt-8">
           <slot />
         </div>
       </main>

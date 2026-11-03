@@ -2,7 +2,7 @@
   <div class="flex min-h-screen flex-col bg-ground lg:h-screen">
     <div v-if="loadError" class="mx-auto mt-24 max-w-xl px-4 text-center">
       <p class="mb-4 text-[14px] text-negative" role="alert">{{ loadError }}</p>
-      <button @click="router.push('/home')" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover md:h-10">홈으로</button>
+      <button @click="router.push('/home')" class="h-11 rounded-control btn-2 px-4 text-[14px] font-medium text-ink md:h-10">홈으로</button>
     </div>
 
     <template v-else-if="session">
@@ -14,7 +14,7 @@
         </div>
         <div class="flex shrink-0 items-center gap-2">
           <span class="mr-1 text-[16px] font-semibold tabular-nums" :class="remaining <= 300 ? 'text-negative' : 'text-ink'" role="timer"><span class="sr-only">남은 시간 </span>{{ label }}</span>
-          <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="h-11 rounded-control border border-control bg-surface px-3 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-9">
+          <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="h-11 rounded-control btn-2 px-3 text-[14px] font-medium text-ink disabled:opacity-50 md:h-9">
             {{ leaving ? '저장 중...' : '임시 저장 후 나가기' }}
           </button>
           <button @click="submit" :disabled="submitting || leaving" class="h-11 rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 md:h-9">
