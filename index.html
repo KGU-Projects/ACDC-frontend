@@ -4,22 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AC/DC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = {
+      // CDN 스크립트가 먼저 로드된 뒤에 설정해야 적용된다.
+      tailwind.config = {
         theme: {
           extend: {
-            colors: {
-              brand: '#10B981',
-              brandHover: '#059669',
-              brandLight: '#D1FAE5',
-              brandBg: '#F0FDF4'
-            }
+          fontFamily: {
+            sans: ['"Pretendard Variable"', 'Pretendard', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            /* 새 디자인 토큰(값은 src/style.css의 :root 변수) */
+            ground: 'var(--ground)',
+            surface: 'var(--surface)',
+            rail: 'var(--rail)',
+            ink: 'var(--ink)',
+            muted: 'var(--muted)',
+            faint: 'var(--faint)',
+            line: 'var(--line)',
+            rule: 'var(--rule)',
+            control: 'var(--control)',
+            primary: 'var(--primary)',
+            primaryHover: 'var(--primary-hover)',
+            accent: 'var(--accent)',
+            positive: 'var(--positive)',
+            negative: 'var(--negative)',
+            /* 기존 색: 아직 재스타일되지 않은 화면이 쓴다(Task 5에서 제거) */
+            brand: '#10B981',
+            brandHover: '#059669',
+            brandLight: '#D1FAE5',
+            brandBg: '#F0FDF4'
+          },
+          borderRadius: {
+            card: '8px',
+            control: '6px',
+            chip: '4px'
           }
+        }
         }
       };
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
     <div id="app"></div>
