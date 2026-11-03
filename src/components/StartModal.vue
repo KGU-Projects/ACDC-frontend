@@ -4,7 +4,7 @@
       <legend class="mb-2 text-[13px] text-muted">응시 방식</legend>
 
       <label class="flex cursor-pointer items-start gap-3 rounded-control border px-3 py-3" :class="mode === 'PRACTICE' ? 'border-accent bg-ground' : 'border-line'">
-        <input v-model="mode" type="radio" name="start-mode" value="PRACTICE" class="mt-1 accent-[#2a7a72]" />
+        <input v-model="mode" type="radio" name="start-mode" value="PRACTICE" class="mt-1 accent-accent" />
         <span>
           <span class="block text-[14px] font-medium text-ink">연습</span>
           <span class="block text-[13px] text-muted">횟수 제한 없이 응시합니다. 채점이 끝나면(최대 1시간 이내) 결과를 확인할 수 있습니다.</span>
@@ -15,7 +15,7 @@
         class="flex items-start gap-3 rounded-control border px-3 py-3"
         :class="[mode === 'REAL' ? 'border-accent bg-ground' : 'border-line', realTaken ? 'cursor-not-allowed' : 'cursor-pointer']"
       >
-        <input v-model="mode" type="radio" name="start-mode" value="REAL" :disabled="realTaken" class="mt-1 accent-[#2a7a72]" aria-describedby="start-real-desc" />
+        <input v-model="mode" type="radio" name="start-mode" value="REAL" :disabled="realTaken" class="mt-1 accent-accent" aria-describedby="start-real-desc" />
         <span>
           <span class="block text-[14px] font-medium" :class="realTaken ? 'text-faint' : 'text-ink'">실전</span>
           <span id="start-real-desc" class="block text-[13px]" :class="realTaken ? 'text-faint' : 'text-muted'">

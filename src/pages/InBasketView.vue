@@ -13,7 +13,7 @@
           <p class="truncate text-[12px] leading-4 text-muted" aria-live="polite">서류함<span v-if="saveState"> · {{ saveState }}</span></p>
         </div>
         <div class="flex shrink-0 items-center gap-2">
-          <span class="mr-1 text-[16px] font-semibold tabular-nums" :class="remaining <= 300 ? 'text-negative' : 'text-ink'" role="timer" aria-label="남은 시간">{{ label }}</span>
+          <span class="mr-1 text-[16px] font-semibold tabular-nums" :class="remaining <= 300 ? 'text-negative' : 'text-ink'" role="timer"><span class="sr-only">남은 시간 </span>{{ label }}</span>
           <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="h-11 rounded-control border border-control bg-surface px-3 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-9">
             {{ leaving ? '저장 중...' : '임시 저장 후 나가기' }}
           </button>

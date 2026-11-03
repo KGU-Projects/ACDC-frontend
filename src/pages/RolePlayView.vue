@@ -1,19 +1,22 @@
 <template>
-  <div class="flex min-h-screen flex-col bg-ground">
+  <div class="flex min-h-screen flex-col bg-ground" :class="phase === 'prep' ? 'lg:h-screen' : ''">
     <div v-if="loadError" class="mx-auto mt-24 max-w-xl px-4 text-center">
       <p class="mb-4 text-[14px] text-negative" role="alert">{{ loadError }}</p>
       <button @click="router.push('/home')" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground md:h-10">홈으로</button>
     </div>
 
-    <div v-else-if="session" class="flex flex-1 flex-col">
-      <header class="flex h-12 items-center justify-between gap-3 px-4" :class="phase === 'call' ? 'fixed inset-x-0 top-0 z-50 bg-[#0d1117]/80 text-white' : 'sticky top-0 z-30 border-b border-line bg-surface'">
-        <div class="min-w-0">
-          <h1 class="truncate text-[14px] font-medium leading-5" :class="phase === 'call' ? 'text-white' : 'text-ink'">{{ session.scenarioTitle }}</h1>
-          <p class="truncate text-[12px] leading-4" :class="phase === 'call' ? 'text-white/75' : 'text-muted'">역할수행 · 상대역 {{ counterpart.name }} {{ counterpart.position }}</p>
+    <div v-else-if="session" class="flex flex-1 flex-col lg:min-h-0">
+      <header class="flex h-12 items-center justify-between gap-3 px-4" :class="phase === 'call' ? 'fixed inset-x-0 top-0 z-50 bg-stage/80 text-white' : 'sticky top-0 z-30 border-b border-line bg-surface'">
+        <div class="flex min-w-0 items-center gap-4">
+          <BrandMark v-if="phase !== 'call'" class="hidden shrink-0 sm:inline-flex" />
+          <div class="min-w-0">
+            <h1 class="truncate text-[14px] font-medium leading-5" :class="phase === 'call' ? 'text-white' : 'text-ink'">{{ session.scenarioTitle }}</h1>
+            <p class="truncate text-[12px] leading-4" :class="phase === 'call' ? 'text-white/75' : 'text-muted'">역할수행 · 상대역 {{ counterpart.name }} {{ counterpart.position }}</p>
+          </div>
         </div>
         <div v-if="phase === 'call'" class="flex shrink-0 items-center gap-3">
-          <span class="text-[16px] font-semibold tabular-nums" :class="remaining <= 120 ? 'text-[#ff9a8f]' : 'text-white'" role="timer" aria-label="남은 시간">{{ label }}</span>
-          <button @click="submit" :disabled="phase !== 'call' || submitting || sending" class="h-11 rounded-control bg-white px-4 text-[14px] font-medium text-ink hover:bg-[#e8edf3] disabled:opacity-50 md:h-9">
+          <span class="text-[16px] font-semibold tabular-nums" :class="remaining <= 120 ? 'text-stageAlert' : 'text-white'" role="timer"><span class="sr-only">남은 시간 </span>{{ label }}</span>
+          <button @click="submit" :disabled="phase !== 'call' || submitting || sending" class="h-11 rounded-control bg-white px-4 text-[14px] font-medium text-ink hover:bg-stageInk disabled:opacity-50 md:h-9">
             {{ submitting ? '채점 중...' : '면담 종료·제출' }}
           </button>
         </div>
@@ -22,7 +25,7 @@
       <p v-if="errorMessage" :class="phase === 'call' ? 'fixed inset-x-0 top-14 z-50 mx-auto w-fit max-w-[90%] rounded-control bg-negative px-4 py-2 text-[13px] text-white' : 'border-b border-line bg-surface px-4 py-2 text-[13px] text-negative'" role="alert">{{ errorMessage }}</p>
 
       <!-- 과제 숙지 -->
-      <main v-if="phase === 'prep'" class="mx-auto flex w-full max-w-7xl flex-1 flex-col p-4 lg:h-[calc(100vh-3rem)] lg:flex-none">
+      <main v-if="phase === 'prep'" class="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col p-4">
         <PrepPanel
           :session-id="sessionId"
           :scenario="scenario"
@@ -50,7 +53,7 @@
             역할수행은 영상통화 형식으로 진행되며, 평가를 위해 표정과 음성 특징을 분석합니다.<br />
             영상 자체는 저장·전송하지 않고, 얼굴 이미지 정보와 음량·발화 시간 같은 수치만 서버로 보냅니다.
           </p>
-          <div class="relative mb-4 aspect-video overflow-hidden rounded-card bg-[#0d1117]">
+          <div class="relative mb-4 aspect-video overflow-hidden rounded-card bg-stage">
             <video ref="gateVideoRef" autoplay muted playsinline class="h-full w-full -scale-x-100 object-cover"></video>
             <p v-if="requesting" class="absolute inset-0 flex items-center justify-center px-6 text-[13px] text-white/85">카메라와 마이크를 확인하는 중...</p>
             <p v-else-if="!mediaStream" class="absolute inset-0 flex items-center justify-center px-6 text-[13px] text-white/75">미리보기를 불러오지 못했습니다</p>
@@ -64,7 +67,7 @@
       </div>
 
       <!-- 면담: 영상통화가 뷰포트 전체를 채우고, 헤더와 왼쪽 채팅이 그 위에 겹친다 -->
-      <div v-else-if="phase === 'call'" class="fixed inset-0 z-40 overflow-hidden bg-[#0d1117]" data-testid="call-stage">
+      <div v-else-if="phase === 'call'" class="group fixed inset-0 z-40 overflow-hidden bg-stage" :class="chatOpen ? 'chat-open' : ''" data-testid="call-stage">
         <CounterpartAvatar :name="counterpart.name" :position="counterpart.position" :speaking="aiSpeaking" :thinking="sending" />
 
         <!-- 채팅 오버레이: 헤더 아래부터 끝까지, 왼쪽 35%(좁은 화면은 넓게, 접기 가능) -->
@@ -81,23 +84,23 @@
             @toggle-listening="toggleListening"
           />
         </div>
-        <button @click="chatOpen = !chatOpen" class="absolute bottom-3 left-3 z-30 h-11 rounded-control border border-white/40 bg-[#0d1117]/85 px-4 text-[14px] font-medium text-white lg:hidden" :class="chatOpen ? 'hidden' : ''">채팅 열기</button>
-        <button v-if="chatOpen" @click="chatOpen = false" class="absolute left-[calc(85%-2.75rem)] top-14 z-30 flex h-11 w-11 items-center justify-center rounded-control bg-[#0d1117]/85 text-[18px] text-white sm:left-[calc(50%-2.75rem)] lg:hidden" aria-label="채팅 접기">×</button>
+        <button @click="chatOpen = !chatOpen" class="absolute bottom-3 left-3 z-30 h-11 rounded-control border border-white/40 bg-stage/85 px-4 text-[14px] font-medium text-white lg:hidden" :class="chatOpen ? 'hidden' : ''">채팅 열기</button>
+        <button v-if="chatOpen" @click="chatOpen = false" class="absolute left-[calc(85%-2.75rem)] top-14 z-30 flex h-11 w-11 items-center justify-center rounded-control bg-stage/85 text-[18px] text-white sm:left-[calc(50%-2.75rem)] lg:hidden" aria-label="채팅 접기">×</button>
 
-        <div class="absolute bottom-3 right-3 z-30 aspect-video w-32 overflow-hidden rounded-card border border-white/60 bg-[#1a212b] transition-opacity sm:w-52" :class="chatOpen ? 'max-sm:pointer-events-none max-sm:opacity-0' : ''" data-testid="self-view">
+        <div class="absolute bottom-3 right-3 z-30 aspect-video w-32 overflow-hidden rounded-card border border-white/60 bg-stageRaised transition-opacity sm:w-52" :class="chatOpen ? 'max-sm:pointer-events-none max-sm:opacity-0' : ''" data-testid="self-view">
           <video ref="selfVideoRef" autoplay muted playsinline class="h-full w-full -scale-x-100 object-cover"></video>
           <span class="absolute left-1.5 top-1.5 rounded-chip bg-black/60 px-1.5 py-0.5 text-[12px] text-white">나</span>
           <div class="absolute inset-x-1.5 bottom-1.5 h-1 overflow-hidden rounded-chip bg-black/50" title="마이크 레벨">
-            <div class="h-full bg-[#7cc4bb] transition-all duration-150" :style="{ width: `${Math.round(audio.level.value * 100)}%` }"></div>
+            <div class="h-full bg-stageOk transition-all duration-150" :style="{ width: `${Math.round(audio.level.value * 100)}%` }"></div>
           </div>
         </div>
 
-        <div class="pointer-events-none absolute right-3 top-14 z-30 flex flex-col items-end gap-1 text-[12px]">
-          <span class="flex items-center gap-1.5 rounded-chip bg-black/60 px-2 py-0.5 text-white"><span class="h-1.5 w-1.5 rounded-full bg-[#7cc4bb]"></span>카메라·마이크 켜짐</span>
-          <span v-if="face.unavailable.value" class="rounded-chip bg-[#f5e6c8] px-2 py-0.5 text-[#6b4a00]">표정 분석 사용 불가</span>
+        <div class="pointer-events-none absolute right-3 top-14 z-30 flex flex-col items-end gap-1 text-[12px]" :class="chatOpen ? 'max-sm:hidden' : ''">
+          <span class="flex items-center gap-1.5 rounded-chip bg-black/60 px-2 py-0.5 text-white"><span class="h-1.5 w-1.5 rounded-full bg-stageOk"></span>카메라·마이크 켜짐</span>
+          <span v-if="face.unavailable.value" class="rounded-chip bg-stageWarnBg px-2 py-0.5 text-stageWarnFg">표정 분석 사용 불가</span>
           <span v-else-if="face.loading.value" class="rounded-chip bg-black/60 px-2 py-0.5 text-white">표정 분석 준비 중...</span>
           <span v-else-if="face.label.value" class="rounded-chip bg-black/60 px-2 py-0.5 text-white">표정: {{ emotionName(face.label.value) }}</span>
-          <span v-if="audio.unavailable.value" class="rounded-chip bg-[#f5e6c8] px-2 py-0.5 text-[#6b4a00]">음성 분석 사용 불가</span>
+          <span v-if="audio.unavailable.value" class="rounded-chip bg-stageWarnBg px-2 py-0.5 text-stageWarnFg">음성 분석 사용 불가</span>
         </div>
       </div>
     </div>
@@ -108,6 +111,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import BrandMark from '../components/ui/BrandMark.vue';
 import CallChatOverlay from '../components/CallChatOverlay.vue';
 import CounterpartAvatar from '../components/CounterpartAvatar.vue';
 import PrepPanel from '../components/PrepPanel.vue';

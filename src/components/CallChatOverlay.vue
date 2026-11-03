@@ -1,8 +1,8 @@
 <template>
-  <div ref="rootEl" class="flex h-full flex-col bg-[#0d1117]/80 text-white" data-testid="call-chat-overlay">
+  <div ref="rootEl" class="flex h-full flex-col bg-stage/80 text-white" data-testid="call-chat-overlay">
     <div ref="logEl" class="min-h-0 flex-grow space-y-3 overflow-y-auto p-3">
       <div v-for="(m, i) in messages" :key="i" class="flex" :class="m.speaker === 'USER' ? 'justify-end' : 'justify-start'">
-        <div class="max-w-[88%] whitespace-pre-wrap rounded-card px-3 py-2 text-[14px] leading-5" :class="m.speaker === 'USER' ? 'bg-[#e8edf3] text-ink' : 'border border-white/20 bg-white/10 text-white'">
+        <div class="max-w-[88%] whitespace-pre-wrap rounded-card px-3 py-2 text-[14px] leading-5" :class="m.speaker === 'USER' ? 'bg-stageInk text-ink' : 'border border-white/20 bg-white/10 text-white'">
           <span class="mb-0.5 block text-[12px]" :class="m.speaker === 'USER' ? 'text-muted' : 'text-white/75'">{{ m.speaker === 'USER' ? '나' : counterpartName || '상대역' }}</span>
           {{ m.text }}
         </div>
@@ -10,8 +10,8 @@
       <p v-if="sending" class="text-[12px] text-white/75" aria-live="polite">상대역이 답변을 준비하고 있습니다...</p>
     </div>
 
-    <div class="shrink-0 border-t border-white/15 bg-[#0d1117]/60 p-3">
-      <p v-if="listening" class="mb-2 text-[12px] text-[#ff9a8f]" aria-live="polite">듣는 중... 말씀하세요</p>
+    <div class="shrink-0 border-t border-white/15 bg-stage/60 p-3">
+      <p v-if="listening" class="mb-2 text-[12px] text-stageAlert" aria-live="polite">듣는 중... 말씀하세요</p>
       <p v-else-if="!speechSupported" class="mb-2 text-[12px] text-white/75">이 브라우저는 음성 인식을 지원하지 않습니다(Chrome 권장). 텍스트로 입력하세요.</p>
       <div class="flex items-end gap-2">
         <textarea :value="draft" @input="emit('update:draft', $event.target.value)" rows="2" :disabled="submitting" aria-label="발화 입력" @keydown.enter.exact="onEnter" class="min-w-0 flex-grow resize-none rounded-control border border-control bg-white p-2.5 text-[14px] text-ink placeholder:text-faint focus-visible:outline-white" placeholder="발화를 입력하거나 마이크로 말한 뒤 확인·수정하세요 (Enter 전송)"></textarea>

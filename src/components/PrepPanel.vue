@@ -1,5 +1,5 @@
 <template>
-  <div class="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-5" data-testid="prep-panel">
+  <div class="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-5 lg:grid-rows-[minmax(0,1fr)]" data-testid="prep-panel">
     <section class="min-h-0 overflow-y-auto rounded-card border border-line bg-surface p-5 text-[14px] leading-6 text-ink lg:col-span-3" aria-label="과제 자료">
       <div class="space-y-5">
         <a v-if="scenario.materialsPdf" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block text-[13px] text-ink underline underline-offset-2">과제 원본 PDF 보기 (새 탭)</a>
@@ -14,13 +14,13 @@
 
     <section class="flex min-h-0 flex-col gap-4 lg:col-span-2">
       <div class="rounded-card border border-line bg-surface p-5">
-        <div class="relative mx-auto mb-3 aspect-video max-w-[240px] overflow-hidden rounded-card bg-[#0d1117]" data-testid="prep-preview">
+        <div class="relative mx-auto mb-3 aspect-video max-w-[240px] overflow-hidden rounded-card bg-stage" data-testid="prep-preview">
           <video ref="previewRef" autoplay muted playsinline class="h-full w-full -scale-x-100 object-cover"></video>
           <p v-if="!stream" class="absolute inset-0 flex items-center justify-center px-3 text-[12px] text-white/75">카메라 미리보기 대기 중</p>
         </div>
         <p v-if="stream" class="mb-3 text-center text-[12px]" :class="micOk ? 'text-positive' : 'text-[var(--pill-warning-fg)]'">{{ micOk ? '카메라 연결됨 · 마이크 연결됨' : '카메라 연결됨 · 마이크를 확인해 주세요' }}</p>
         <p class="text-center text-[13px] text-muted">과제 숙지 남은 시간</p>
-        <p class="text-center text-[32px] font-semibold leading-10 tabular-nums text-ink" role="timer">{{ remainingLabel }}</p>
+        <p class="text-center text-[32px] font-semibold leading-10 tabular-nums text-ink" role="timer"><span class="sr-only">남은 시간 </span>{{ remainingLabel }}</p>
         <p class="mt-2 text-center text-[12px] leading-5 text-muted">숙지 시간이 끝나면 자동으로 영상통화 면담이 시작됩니다.<br />면담은 카메라와 마이크를 켠 상태에서만 진행됩니다.</p>
         <p v-if="requesting" class="mt-3 text-center text-[13px] text-muted">카메라와 마이크를 확인하는 중...</p>
         <div v-if="mediaError" class="mt-3 text-center" role="alert">

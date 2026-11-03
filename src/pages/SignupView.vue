@@ -29,7 +29,7 @@
           </div>
 
           <div class="mb-5 flex items-start gap-2">
-            <input v-model="terms" id="terms" type="checkbox" class="mt-[3px] h-4 w-4 shrink-0 accent-[#1b2a3d]" :disabled="isSubmitting" required>
+            <input v-model="terms" id="terms" type="checkbox" class="mt-[3px] h-4 w-4 shrink-0 accent-primary" :disabled="isSubmitting" required>
             <label for="terms" class="text-[14px] leading-snug text-muted">
               <a href="#" class="link-text">이용약관</a> 및 <a href="#" class="link-text">개인정보 처리방침</a>에 동의합니다.
             </label>
