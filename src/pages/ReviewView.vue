@@ -69,7 +69,7 @@
             <div class="mt-3 border-t border-slate-100 pt-3">
               <template v-if="editable && forms[e.competency]">
                 <label class="block text-xs font-bold text-slate-500 mb-1">최종 점수 (1~5 정수)</label>
-                <input type="number" min="1" max="5" step="1" v-model.number="forms[e.competency].finalScore" class="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-sm" />
+                <input type="number" min="1" max="5" step="1" :placeholder="`AI ${e.aiScore}점`" v-model.number="forms[e.competency].finalScore" class="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-sm" />
                 <label class="block text-xs font-bold text-slate-500 mt-3 mb-1">FT 코멘트</label>
                 <textarea v-model="forms[e.competency].ftComment" rows="2" class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm"></textarea>
               </template>
@@ -192,7 +192,7 @@ const select = async (r) => {
     const data = await getSession(r.id);
     if (selectedId.value !== r.id) return;
     (data.evaluations || []).forEach((e) => {
-      forms[e.competency] = { finalScore: e.finalScore ?? e.aiScore ?? null, ftComment: e.ftComment || '' };
+      forms[e.competency] = { finalScore: e.finalScore ?? null, ftComment: e.ftComment || '' };
     });
     detail.value = data;
   } catch (error) {
@@ -236,6 +236,10 @@ const requeue = async (r) => {
   listError.value = '';
   try {
     await requeueSession(r.id);
+    if (selectedId.value === r.id) {
+      selectedId.value = null;
+      detail.value = null;
+    }
     await loadReviews();
   } catch (error) {
     listError.value = error.message || '재채점을 요청하지 못했습니다.';
