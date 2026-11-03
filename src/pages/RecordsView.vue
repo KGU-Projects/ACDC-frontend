@@ -25,7 +25,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-rule">
-            <tr v-for="s in sessions" :key="s.id" :class="clickable(s) ? 'cursor-pointer hover:bg-ground' : ''" @click="clickable(s) && openSession(s)">
+            <tr v-for="s in sessions" :key="s.id" :class="clickable(s) ? 'cursor-pointer hover:bg-hover' : ''" @click="clickable(s) && openSession(s)">
               <td class="max-w-0 px-4 py-3 text-ink">
                 <button v-if="clickable(s)" type="button" class="block max-w-full truncate text-left font-medium hover:underline" @click.stop="openSession(s)">{{ s.scenarioTitle }}</button>
                 <span v-else class="block truncate font-medium">{{ s.scenarioTitle }}</span>

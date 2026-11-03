@@ -9,7 +9,7 @@
     </nav>
     <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
       <div class="min-w-0">
-        <h1 class="text-[24px] font-semibold leading-8 text-ink">{{ title }}</h1>
+        <h1 class="text-[24px] font-semibold leading-8 tracking-[-0.02em] text-ink">{{ title }}</h1>
         <p v-if="subtitle" class="mt-1 text-[14px] text-muted">{{ subtitle }}</p>
       </div>
       <div v-if="$slots.actions" class="flex shrink-0 items-center gap-2">

@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(17,24,39,0.4)] p-0 sm:items-center sm:p-4"
+      class="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(27,28,32,0.4)] p-0 sm:items-center sm:p-4"
       @mousedown.self="emit('close')"
     >
       <div
@@ -18,7 +18,7 @@
           <h2 :id="titleId" class="text-[16px] font-semibold text-ink">{{ title }}</h2>
           <button
             type="button"
-            class="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-muted md:h-9 md:w-9 hover:bg-ground hover:text-ink"
+            class="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-muted md:h-9 md:w-9 hover:bg-hover hover:text-ink"
             aria-label="닫기"
             @click="emit('close')"
           >
@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .modal-panel {
-  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.12);
+  box-shadow: 0 8px 24px rgba(27, 28, 32, 0.12);
   outline: none;
 }
 </style>

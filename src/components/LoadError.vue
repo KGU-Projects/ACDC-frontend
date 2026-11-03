@@ -3,7 +3,7 @@
     <p class="text-[14px] text-muted">{{ message }}</p>
     <button
       type="button"
-      class="h-11 rounded-control px-3 text-[14px] font-medium text-ink underline underline-offset-2 hover:bg-ground md:h-10"
+      class="h-11 rounded-control px-3 text-[14px] font-medium text-ink underline underline-offset-2 hover:bg-hover md:h-10"
       @click="emit('retry')"
     >다시 시도</button>
   </div>

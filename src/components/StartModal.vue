@@ -3,7 +3,7 @@
     <fieldset class="space-y-2" :disabled="starting">
       <legend class="mb-2 text-[13px] text-muted">응시 방식</legend>
 
-      <label class="flex cursor-pointer items-start gap-3 rounded-control border px-3 py-3" :class="mode === 'PRACTICE' ? 'border-accent bg-ground' : 'border-line'">
+      <label class="flex cursor-pointer items-start gap-3 rounded-control border px-3 py-3" :class="mode === 'PRACTICE' ? 'border-accent bg-accentTint' : 'border-line'">
         <input v-model="mode" type="radio" name="start-mode" value="PRACTICE" class="mt-1 accent-accent" />
         <span>
           <span class="block text-[14px] font-medium text-ink">연습</span>
@@ -13,7 +13,7 @@
 
       <label
         class="flex items-start gap-3 rounded-control border px-3 py-3"
-        :class="[mode === 'REAL' ? 'border-accent bg-ground' : 'border-line', realTaken ? 'cursor-not-allowed' : 'cursor-pointer']"
+        :class="[mode === 'REAL' ? 'border-accent bg-accentTint' : 'border-line', realTaken ? 'cursor-not-allowed' : 'cursor-pointer']"
       >
         <input v-model="mode" type="radio" name="start-mode" value="REAL" :disabled="realTaken" class="mt-1 accent-accent" aria-describedby="start-real-desc" />
         <span>
@@ -30,7 +30,7 @@
     <template #footer>
       <button
         type="button"
-        class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-10"
+        class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-10"
         :disabled="starting"
         @click="emit('close')"
       >취소</button>

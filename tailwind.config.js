@@ -27,6 +27,7 @@ export default {
         accent: 'var(--accent)',
         accentTint: 'var(--accent-tint)',
         accentLine: 'var(--accent-line)',
+        hover: 'var(--hover)',
         topbar: 'var(--topbar)',
         positive: 'var(--positive)',
         negative: 'var(--negative)',

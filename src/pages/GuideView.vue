@@ -17,7 +17,7 @@
     <p class="mt-4 text-[14px] leading-6 text-muted">권장 환경은 데스크톱 Chrome이며, 역할수행에는 카메라와 마이크가 필요합니다.</p>
 
     <div class="mt-6">
-      <RouterLink to="/tasks" class="inline-flex h-11 items-center gap-1.5 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground md:h-10">
+      <RouterLink to="/tasks" class="inline-flex h-11 items-center gap-1.5 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover md:h-10">
         평가 과제 보기
         <AppIcon name="arrow-right" :size="14" />
       </RouterLink>

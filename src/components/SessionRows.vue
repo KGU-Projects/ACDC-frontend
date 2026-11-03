@@ -5,7 +5,7 @@
         :is="clickable(s) ? 'button' : 'div'"
         :type="clickable(s) ? 'button' : undefined"
         class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
-        :class="clickable(s) ? 'hover:bg-ground' : ''"
+        :class="clickable(s) ? 'hover:bg-hover' : ''"
         @click="clickable(s) && emit('open', s)"
       >
         <span class="min-w-0">

@@ -10,7 +10,7 @@
             :id="`faq-q-${i}`"
             :aria-expanded="openIndex === i"
             :aria-controls="`faq-a-${i}`"
-            class="flex min-h-[48px] w-full items-center justify-between gap-4 px-4 py-3 text-left text-[15px] font-medium text-ink hover:bg-ground sm:px-5"
+            class="flex min-h-[48px] w-full items-center justify-between gap-4 px-4 py-3 text-left text-[15px] font-medium text-ink hover:bg-hover sm:px-5"
             @click="openIndex = openIndex === i ? -1 : i"
           >
             <span>{{ item.q }}</span>

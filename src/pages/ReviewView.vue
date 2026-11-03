@@ -14,7 +14,7 @@
             <span class="block text-[12px] text-muted">{{ s.type === 'IN_BASKET' ? '서류함' : '역할수행' }} · 현재 {{ s.resultReleaseAt ? formatDate(s.resultReleaseAt) : '미설정' }}</span>
             <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
               <div class="min-w-0 sm:w-60"><input type="datetime-local" v-model="releaseInputs[s.id]" :aria-label="`${s.title} 공개 시각`" class="field-input" /></div>
-              <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-10">저장</button>
+              <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-10">저장</button>
             </div>
           </li>
         </ul>
@@ -25,12 +25,12 @@
         <p v-if="listError" class="mb-3 text-[13px] text-negative" role="alert">{{ listError }}</p>
         <p v-if="!reviews.length" class="text-[13px] text-muted">검토 대상 세션이 없습니다.</p>
         <ul class="divide-y divide-rule border-t border-rule">
-          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control px-3 py-2" :class="r.id === selectedId ? 'bg-line' : ''">
+          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control px-3 py-2" :class="r.id === selectedId ? 'bg-accentTint' : ''">
             <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left" :class="r.id === selectedId ? 'font-medium' : ''">
               <span class="block truncate text-[14px] font-medium text-ink">{{ r.scenarioTitle }}</span>
               <span class="block truncate text-[12px] text-muted">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
             </button>
-            <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="h-11 rounded-control border border-control bg-surface px-3 text-[13px] font-medium text-negative hover:bg-ground disabled:opacity-50 md:h-8">재채점 요청</button>
+            <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="h-11 rounded-control border border-control bg-surface px-3 text-[13px] font-medium text-negative hover:bg-hover disabled:opacity-50 md:h-8">재채점 요청</button>
             <StatusPill :tone="toneOf(r.stage)" :label="STAGE_LABELS[r.stage] || r.stage" />
           </li>
         </ul>

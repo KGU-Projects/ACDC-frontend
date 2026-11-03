@@ -4,7 +4,7 @@
       <div class="mb-8"><BrandMark size="lg" /></div>
 
       <div class="rounded-card border border-line bg-surface p-6 sm:p-8">
-        <h1 class="text-[24px] font-semibold leading-8 text-ink">로그인</h1>
+        <h1 class="text-[24px] font-semibold leading-8 tracking-[-0.02em] text-ink">로그인</h1>
 
         <form class="mt-6" @submit.prevent="handleLogin">
           <div class="mb-4">

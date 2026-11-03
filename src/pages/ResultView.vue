@@ -32,7 +32,7 @@
           <div class="flex items-start justify-between gap-4">
             <h2 class="min-w-0 text-[16px] font-semibold leading-6 text-ink">{{ e.competency }}</h2>
             <div class="shrink-0 text-right">
-              <p class="text-ink tabular-nums"><span class="text-[24px] font-semibold leading-8">{{ scoreOf(e) }}</span><span class="text-[14px] text-muted"> / 5</span></p>
+              <p class="text-ink tabular-nums"><span class="text-[24px] font-semibold leading-8 tracking-[-0.02em]">{{ scoreOf(e) }}</span><span class="text-[14px] text-muted"> / 5</span></p>
               <p v-if="e.finalScore != null && e.finalScore !== e.aiScore" class="text-[12px] text-muted tabular-nums">AI 점수 {{ e.aiScore }} → FT 확정</p>
             </div>
           </div>

@@ -18,7 +18,7 @@
       </div>
       <button
         type="button"
-        class="flex h-11 w-11 items-center justify-center rounded-control text-muted hover:bg-line hover:text-ink"
+        class="flex h-11 w-11 items-center justify-center rounded-control text-muted hover:bg-hover hover:text-ink"
         aria-label="로그아웃"
         title="로그아웃"
         @click="emit('logout')"

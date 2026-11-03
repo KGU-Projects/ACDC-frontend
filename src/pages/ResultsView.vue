@@ -12,7 +12,7 @@
       </EmptyState>
       <ul v-else class="divide-y divide-rule rounded-card border border-line bg-surface">
         <li v-for="s in ready" :key="s.id">
-          <RouterLink :to="`/result/${s.id}`" class="flex min-h-[56px] items-center justify-between gap-3 px-4 py-3 hover:bg-ground">
+          <RouterLink :to="`/result/${s.id}`" class="flex min-h-[56px] items-center justify-between gap-3 px-4 py-3 hover:bg-hover">
             <span class="min-w-0">
               <span class="block truncate text-[14px] font-medium text-ink">{{ s.scenarioTitle }}</span>
               <span class="mt-0.5 block text-[12px] text-muted tabular-nums">{{ typeLabel(s.scenarioType) }} · {{ modeLabel(s.mode) }} · {{ formatDate(s.createdAt) || '–' }}</span>

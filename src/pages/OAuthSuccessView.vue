@@ -4,7 +4,7 @@
       <div class="mb-8"><BrandMark size="lg" /></div>
 
       <div class="rounded-card border border-line bg-surface p-6 sm:p-8" role="status" aria-live="polite">
-        <h1 class="text-[24px] font-semibold leading-8" :class="isError ? 'text-negative' : 'text-ink'">
+        <h1 class="text-[24px] font-semibold leading-8 tracking-[-0.02em]" :class="isError ? 'text-negative' : 'text-ink'">
           {{ statusTitle }}
         </h1>
         <p class="mt-2 text-[14px] leading-relaxed text-muted" v-html="statusDesc"></p>

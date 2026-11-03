@@ -1,12 +1,12 @@
 <template>
   <span class="inline-flex items-center" :class="s.gap">
     <svg :width="s.icon" :height="s.icon" viewBox="0 0 32 32" fill="none" aria-hidden="true" class="shrink-0">
-      <path d="M4 28 L13 6 L22 28" stroke="var(--primary)" stroke-width="3.6" stroke-linejoin="miter" stroke-linecap="butt" />
-      <path d="M8 21 H18" stroke="var(--primary)" stroke-width="3.2" />
+      <path d="M4 28 L13 6 L22 28" stroke="var(--ink)" stroke-width="3.6" stroke-linejoin="miter" stroke-linecap="butt" />
+      <path d="M8 21 H18" stroke="var(--ink)" stroke-width="3.2" />
       <path d="M16.5 14 L28 3.5 M20.5 3.5 H28 V11" stroke="var(--accent)" stroke-width="2.8" stroke-linecap="square" stroke-linejoin="miter" />
     </svg>
     <span class="inline-flex flex-col leading-none">
-      <span class="font-bold tracking-[-0.03em] text-ink" :class="s.word">AC/DC</span>
+      <span class="font-semibold tracking-[-0.02em] text-ink" :class="s.word">AC/DC</span>
       <span class="text-muted" :class="s.sub">역량평가 포털</span>
     </span>
   </span>
