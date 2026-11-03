@@ -21,10 +21,26 @@
 
       <p v-if="errorMessage" class="mb-2 text-xs font-bold text-rose-500">{{ errorMessage }}</p>
 
-      <!-- 시작 게이트: 카메라·마이크 확인 -->
-      <div v-if="phase === 'gate'" class="flex-grow flex items-center justify-center min-h-0">
+      <!-- 과제 숙지 -->
+      <PrepPanel
+        v-if="phase === 'prep'"
+        :session-id="sessionId"
+        :scenario="scenario"
+        :remaining-label="label"
+        :can-start="!starting"
+        :media-error="mediaError"
+        :requesting="requesting"
+        :show-skip="demoSkip"
+        @start="startFromPrep"
+        @skip="startFromPrep"
+        @retry-media="checkDevices"
+      />
+
+      <!-- 권한 요청: 카메라·마이크 스트림이 있어야 면담에 들어간다 -->
+      <div v-else-if="phase === 'permission'" class="flex-grow flex items-center justify-center min-h-0">
         <div class="bg-white rounded-2xl shadow p-6 w-full max-w-lg text-center">
           <h2 class="text-lg font-extrabold text-slate-800 mb-1">카메라·마이크 확인</h2>
+          <p v-if="permissionWarning" class="text-sm font-bold text-rose-500 mb-2">{{ permissionWarning }}</p>
           <p class="text-xs text-slate-500 mb-4 leading-relaxed">
             역할수행은 영상통화 형식으로 진행되며, 평가를 위해 표정과 음성 특징을 분석합니다.<br />
             영상 자체는 저장·전송하지 않고, 얼굴 이미지 정보와 음량·발화 시간 같은 수치만 서버로 보냅니다.
@@ -36,14 +52,13 @@
           </div>
           <p v-if="mediaError" class="text-sm font-bold text-rose-500 mb-4 leading-relaxed">{{ mediaError }}</p>
           <div class="flex gap-2 justify-center">
-            <button v-if="mediaError" @click="checkDevices" :disabled="requesting" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">다시 시도</button>
-            <button v-else @click="startCall" :disabled="!mediaStream" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">면담 시작</button>
+            <button @click="retryFromPermission" :disabled="requesting" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">다시 요청</button>
             <button @click="leave" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold px-5 py-2.5 rounded-xl transition-colors">홈으로</button>
           </div>
         </div>
       </div>
 
-      <div v-else class="flex-grow grid grid-cols-1 lg:grid-cols-5 gap-3 min-h-0">
+      <div v-else-if="phase === 'call'" class="flex-grow grid grid-cols-1 lg:grid-cols-5 gap-3 min-h-0">
         <section class="lg:col-span-2 bg-white rounded-2xl shadow p-5 overflow-y-auto text-sm text-slate-700 leading-relaxed min-h-0 max-h-60 lg:max-h-none">
           <div class="space-y-4">
             <a v-if="scenario.materialsPdf" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block text-xs font-bold text-brand">과제 원본 PDF 보기 (새 탭)</a>
@@ -112,11 +127,12 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import CounterpartAvatar from '../components/CounterpartAvatar.vue';
+import PrepPanel from '../components/PrepPanel.vue';
 import { EMOTION_LABELS, useFaceEmotion } from '../composables/useFaceEmotion';
 import { useAudioFeatures } from '../composables/useAudioFeatures';
 import { useMediaCapture } from '../composables/useMediaCapture';
 import { useRoute, useRouter } from 'vue-router';
-import { getSession, sendTurn, submitSession } from '../api/acdc';
+import { getSession, sendTurn, startCall as startCallApi, startPrep, submitSession } from '../api/acdc';
 import { useCountdown } from '../composables/useCountdown';
 
 const route = useRoute();
@@ -134,7 +150,13 @@ const listening = ref(false);
 const logEl = ref(null);
 const { remaining, label, start: startCountdown, stop: stopCountdown } = useCountdown();
 
-const phase = ref('gate'); // gate(카메라·마이크 확인) → call(면담 진행)
+// prep(과제 숙지) → call(면담). permission은 면담 차례인데 카메라·마이크 스트림이 없을 때 머무는 상태.
+// call로 가는 길은 enterCall 하나뿐이고, enterCall이 스트림을 확인한다.
+const phase = ref('permission');
+const starting = ref(false);
+const permissionWarning = ref('');
+const demoSkip = import.meta.env.VITE_DEMO_SKIP === 'true';
+const PERMISSION_WARNING = '카메라와 마이크 사용을 허용해야 면담을 시작할 수 있습니다.';
 const gateVideoRef = ref(null);
 const selfVideoRef = ref(null);
 const aiSpeaking = ref(false);
@@ -167,11 +189,20 @@ const speakFor = (text) => {
   }, Math.max(1200, (text || '').length * 60));
 };
 
-const startCall = async () => {
-  if (!mediaStream.value) return;
+// 면담 진입의 유일한 경로. 스트림이 없으면 전환하지 않고 권한 요청 상태로 보낸다.
+const enterCall = async (callSeconds) => {
+  if (!mediaStream.value) {
+    stopCountdown();
+    permissionWarning.value = PERMISSION_WARNING;
+    phase.value = 'permission';
+    await bindStream(gateVideoRef);
+    return false;
+  }
+  permissionWarning.value = '';
   phase.value = 'call';
   await bindStream(selfVideoRef);
-  startCountdown(session.value.remainingSeconds, submit);
+  if (phase.value !== 'call' || !mediaStream.value) return false;
+  startCountdown(callSeconds, submit);
   audio.start(mediaStream.value);
   const video = selfVideoRef.value;
   if (video && video.readyState < 2) {
@@ -180,6 +211,72 @@ const startCall = async () => {
   face.start(selfVideoRef.value);
   const last = messages.value[messages.value.length - 1];
   if (last?.speaker === 'AI') speakFor(last.text);
+  return true;
+};
+
+// 서버에 면담 시작을 알리고(멱등) 면담 남은 시간을 받아 진입한다.
+const beginCall = async () => {
+  const res = await startCallApi(sessionId);
+  return enterCall(res.remainingSeconds);
+};
+
+// "역할 수행 시작"과 건너뛰기가 함께 쓴다. 스트림이 없으면 경고하고 권한을 다시 요청한다.
+const startFromPrep = async () => {
+  if (starting.value || phase.value !== 'prep') return;
+  starting.value = true;
+  errorMessage.value = '';
+  try {
+    if (!mediaStream.value) {
+      errorMessage.value = PERMISSION_WARNING;
+      await checkDevices();
+      if (!mediaStream.value) return;
+      errorMessage.value = '';
+    }
+    if (phase.value !== 'prep') return;
+    stopCountdown();
+    await beginCall();
+  } catch (error) {
+    errorMessage.value = error.message || '면담을 시작하지 못했습니다.';
+  } finally {
+    starting.value = false;
+  }
+};
+
+// 숙지 시간 만료: 서버상 면담은 시작된 것으로 계산된다. 스트림이 없으면 permission으로 간다.
+const onPrepExpired = async () => {
+  if (starting.value || phase.value !== 'prep') return;
+  starting.value = true;
+  try {
+    await beginCall();
+  } catch (error) {
+    errorMessage.value = error.message || '면담을 시작하지 못했습니다.';
+  } finally {
+    starting.value = false;
+  }
+};
+
+// permission 상태에서 스트림을 확보하면 서버의 최신 면담 남은 시간으로 바로 진입한다.
+const retryFromPermission = async () => {
+  if (starting.value) return;
+  starting.value = true;
+  errorMessage.value = '';
+  try {
+    await checkDevices();
+    if (!mediaStream.value) {
+      permissionWarning.value = PERMISSION_WARNING;
+      return;
+    }
+    const data = await getSession(sessionId);
+    if (data.stage !== 'IN_PROGRESS') {
+      router.replace('/home');
+      return;
+    }
+    await enterCall(data.remainingSeconds);
+  } catch (error) {
+    errorMessage.value = error.message || '면담을 시작하지 못했습니다.';
+  } finally {
+    starting.value = false;
+  }
 };
 
 const stopCapture = () => {
@@ -294,7 +391,19 @@ onMounted(async () => {
       // 첫 대사는 화면에만 보여 준다(서버 대화 기록에는 사용자 발화부터 쌓인다).
       messages.value.push({ speaker: 'AI', text: data.scenario.openingLine });
     }
-    await checkDevices();
+    if (data.phase === 'PREP') {
+      // 서버가 시계를 소유한다. 새로고침해도 서버가 멱등이라 남은 시간이 늘지 않는다.
+      const prep = await startPrep(sessionId);
+      if (prep.phase === 'PREP') {
+        phase.value = 'prep';
+        startCountdown(prep.prepRemainingSeconds, onPrepExpired);
+        await checkDevices();
+        return;
+      }
+    }
+    // 이미 면담 중이거나(CALL) 숙지가 없는 세션(null): 스트림을 확보하는 즉시 면담에 들어간다.
+    phase.value = 'permission';
+    await retryFromPermission();
   } catch (error) {
     loadError.value = error.message || '세션을 불러오지 못했습니다.';
   }

@@ -20,3 +20,5 @@ export const confirmEvaluations = (id, items) => apiPut(`/api/sessions/${id}/eva
 export const requeueSession = (id) => apiPost(`/api/sessions/${id}/requeue`)
 export const setResultRelease = (scenarioId, releaseAt) =>
   apiPut(`/api/scenarios/${scenarioId}/result-release`, { releaseAt })
+export const startPrep = (id) => apiPost(`/api/sessions/${id}/prep/start`)
+export const startCall = (id) => apiPost(`/api/sessions/${id}/call/start`)
