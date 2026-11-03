@@ -3,21 +3,33 @@
     <PageHeader title="평가 이용 안내" subtitle="과제를 고른 뒤 제출하고 결과를 확인하기까지의 흐름입니다." />
 
     <ol class="divide-y divide-rule rounded-card border border-line bg-surface">
-      <li v-for="(step, i) in steps" :key="step.title" class="flex gap-4 px-4 py-4 sm:px-5">
-        <span class="w-5 shrink-0 pt-[2px] text-[14px] font-medium text-muted tabular-nums" aria-hidden="true">{{ i + 1 }}</span>
-        <div class="min-w-0">
-          <h2 class="text-[16px] font-semibold leading-6 text-ink"><span class="sr-only">{{ i + 1 }}단계. </span>{{ step.title }}</h2>
-          <ul class="mt-1.5 space-y-1">
-            <li v-for="line in step.lines" :key="line" class="text-[14px] leading-6 text-muted">{{ line }}</li>
-          </ul>
-        </div>
+      <li v-for="(step, i) in steps" :key="step.title" class="grid gap-x-8 gap-y-1.5 px-5 py-5 md:grid-cols-[200px_minmax(0,1fr)] md:px-6">
+        <h2 class="text-[16px] font-semibold leading-6 text-ink"><span class="sr-only">{{ i + 1 }}단계. </span>{{ step.title }}</h2>
+        <ul class="max-w-[68ch] space-y-1.5">
+          <li v-for="line in step.lines" :key="line" class="text-[14px] leading-6 text-ink">{{ line }}</li>
+        </ul>
       </li>
     </ol>
+
+    <!-- 결과까지 거치는 단계: 나의 응시 내역의 진행 트랙과 같은 그림 -->
+    <section class="mt-3 grid gap-x-8 gap-y-5 rounded-card border border-line bg-surface px-5 py-5 md:grid-cols-[200px_minmax(0,1fr)] md:px-6" aria-labelledby="guide-paths">
+      <h2 id="guide-paths" class="text-[16px] font-semibold leading-6 text-ink">결과까지의 단계</h2>
+      <div class="grid gap-5 lg:grid-cols-2 lg:gap-8">
+        <div>
+          <p class="mb-2.5 text-[14px] font-medium text-ink">연습 <span class="font-normal text-muted">· 채점 후 최대 1시간 이내</span></p>
+          <StageTrack mode="PRACTICE" size="full" preview />
+        </div>
+        <div>
+          <p class="mb-2.5 text-[14px] font-medium text-ink">실전 <span class="font-normal text-muted">· 관리자가 정한 공개 시각</span></p>
+          <StageTrack mode="REAL" size="full" preview />
+        </div>
+      </div>
+    </section>
 
     <p class="mt-4 text-[14px] leading-6 text-muted">권장 환경은 데스크톱 Chrome이며, 역할수행에는 카메라와 마이크가 필요합니다.</p>
 
     <div class="mt-6">
-      <RouterLink to="/tasks" class="inline-flex h-11 items-center gap-1.5 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover md:h-10">
+      <RouterLink to="/tasks" class="inline-flex h-11 items-center gap-1.5 rounded-control btn-2 px-4 text-[14px] font-medium text-ink md:h-10">
         평가 과제 보기
         <AppIcon name="arrow-right" :size="14" />
       </RouterLink>
@@ -28,6 +40,7 @@
 <script setup>
 import PageHeader from '../components/ui/PageHeader.vue';
 import AppIcon from '../components/ui/AppIcon.vue';
+import StageTrack from '../components/ui/StageTrack.vue';
 
 const steps = [
   {

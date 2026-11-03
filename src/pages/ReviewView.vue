@@ -1,44 +1,50 @@
 <template>
-  <div class="max-w-3xl">
-    <PageHeader title="FT 검토" subtitle="결과 공개 시각을 설정하고, 채점된 응시 건을 검토해 최종 점수를 확정합니다." />
+  <div>
+    <PageHeader title="FT 검토" subtitle="채점된 응시 건을 검토해 최종 점수를 확정하고, 과제별 결과 공개 시각을 정합니다." />
 
-    <div class="space-y-6">
-      <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="release-title">
-        <h2 id="release-title" class="text-[16px] font-semibold text-ink">결과 공개 시각</h2>
-        <p class="mb-3 mt-1 text-[13px] text-muted">과제별 설정이며 실전 응시 결과에 적용됩니다. 이미 지난 공개 시각을 더 늦출 수는 없습니다.</p>
-        <p v-if="releaseMessage" class="mb-3 text-[13px]" :class="releaseError ? 'text-negative' : 'text-positive'" role="status">{{ releaseMessage }}</p>
-        <p v-if="!scenarios.length" class="text-[13px] text-muted">등록된 과제가 없습니다.</p>
-        <ul class="divide-y divide-rule border-t border-rule">
-          <li v-for="s in scenarios" :key="s.id" class="py-3">
-            <span class="block text-[14px] font-medium text-ink">{{ s.title }}</span>
-            <span class="block text-[12px] text-muted">{{ s.type === 'IN_BASKET' ? '서류함' : '역할수행' }} · 현재 {{ s.resultReleaseAt ? formatDate(s.resultReleaseAt) : '미설정' }}</span>
-            <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div class="min-w-0 sm:w-60"><input type="datetime-local" v-model="releaseInputs[s.id]" :aria-label="`${s.title} 공개 시각`" class="field-input" /></div>
-              <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-hover disabled:opacity-50 md:h-10">저장</button>
-            </div>
-          </li>
-        </ul>
-      </section>
+    <!-- 넓은 화면: 왼쪽 검토 목록(+공개 시각), 오른쪽 선택한 건의 상세. 좁은 화면은 위아래로 쌓는다. -->
+    <div class="grid items-start gap-3 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+      <div class="min-w-0 space-y-3">
+        <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="review-title">
+          <div class="mb-3 flex items-baseline justify-between gap-3">
+            <h2 id="review-title" class="text-[16px] font-semibold text-ink">검토 목록</h2>
+            <span class="text-[12px] text-muted tabular-nums">FT 검토 대기 {{ reviews.filter((r) => r.stage === 'FT_REVIEW').length }}건 · 전체 {{ reviews.length }}건</span>
+          </div>
+          <p v-if="listError" class="mb-3 text-[13px] text-negative" role="alert">{{ listError }}</p>
+          <p v-if="!reviews.length && !listError" class="rounded-card border border-dashed border-dash px-4 py-3 text-[13px] text-muted">검토 대상 세션이 없습니다.</p>
+          <ul class="-mx-2 space-y-0.5">
+            <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control px-2 py-1.5" :class="r.id === selectedId ? 'bg-active' : 'hover:bg-hover'">
+              <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left" :class="r.id === selectedId ? 'font-medium' : ''">
+                <span class="block truncate text-[14px] font-medium text-ink">{{ r.scenarioTitle }}</span>
+                <span class="block truncate text-[12px] text-muted">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
+              </button>
+              <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="h-11 rounded-control btn-2 px-3 text-[13px] font-medium text-negative disabled:opacity-50 md:h-8">재채점 요청</button>
+              <StatusPill :tone="toneOf(r.stage)" :label="STAGE_LABELS[r.stage] || r.stage" />
+            </li>
+          </ul>
+        </section>
 
-      <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="review-title">
-        <h2 id="review-title" class="mb-3 text-[16px] font-semibold text-ink">검토 목록</h2>
-        <p v-if="listError" class="mb-3 text-[13px] text-negative" role="alert">{{ listError }}</p>
-        <p v-if="!reviews.length" class="text-[13px] text-muted">검토 대상 세션이 없습니다.</p>
-        <ul class="divide-y divide-rule border-t border-rule">
-          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control px-3 py-2" :class="r.id === selectedId ? 'bg-accentTint' : ''">
-            <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left" :class="r.id === selectedId ? 'font-medium' : ''">
-              <span class="block truncate text-[14px] font-medium text-ink">{{ r.scenarioTitle }}</span>
-              <span class="block truncate text-[12px] text-muted">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
-            </button>
-            <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="h-11 rounded-control border border-control bg-surface px-3 text-[13px] font-medium text-negative hover:bg-hover disabled:opacity-50 md:h-8">재채점 요청</button>
-            <StatusPill :tone="toneOf(r.stage)" :label="STAGE_LABELS[r.stage] || r.stage" />
-          </li>
-        </ul>
-      </section>
+        <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="release-title">
+          <h2 id="release-title" class="text-[16px] font-semibold text-ink">결과 공개 시각</h2>
+          <p class="mb-3 mt-1 text-[13px] text-muted">과제별 설정이며 실전 응시 결과에 적용됩니다. 이미 지난 공개 시각을 더 늦출 수는 없습니다.</p>
+          <p v-if="releaseMessage" class="mb-3 text-[13px]" :class="releaseError ? 'text-negative' : 'text-positive'" role="status">{{ releaseMessage }}</p>
+          <p v-if="!scenarios.length" class="rounded-card border border-dashed border-dash px-4 py-3 text-[13px] text-muted">등록된 과제가 없습니다.</p>
+          <ul class="divide-y divide-rule border-t border-rule">
+            <li v-for="s in scenarios" :key="s.id" class="py-3">
+              <span class="block text-[14px] font-medium text-ink">{{ s.title }}</span>
+              <span class="block text-[12px] text-muted">{{ s.type === 'IN_BASKET' ? '서류함' : '역할수행' }} · 현재 {{ s.resultReleaseAt ? formatDate(s.resultReleaseAt) : '미설정' }}</span>
+              <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="min-w-0 sm:flex-1"><input type="datetime-local" v-model="releaseInputs[s.id]" :aria-label="`${s.title} 공개 시각`" class="field-input" /></div>
+                <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="h-11 rounded-control btn-2 px-4 text-[14px] font-medium text-ink disabled:opacity-50 md:h-10">저장</button>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
 
-      <section v-if="selectedId" class="space-y-4" aria-label="검토 상세">
-        <p v-if="detailError" class="text-center text-[14px] text-negative" role="alert">{{ detailError }}</p>
-        <p v-else-if="!detail" class="text-center text-[14px] text-muted">불러오는 중...</p>
+      <section v-if="selectedId" class="min-w-0 space-y-3" aria-label="검토 상세">
+        <p v-if="detailError" class="rounded-card border border-line bg-surface px-5 py-6 text-[14px] text-negative" role="alert">{{ detailError }}</p>
+        <div v-else-if="!detail" class="rounded-card border border-line bg-surface p-5" aria-busy="true" aria-label="불러오는 중"><div class="h-5 w-24 rounded-chip bg-rule"></div><div class="mt-4 h-4 w-full rounded-chip bg-rule"></div><div class="mt-2 h-4 w-4/5 rounded-chip bg-rule"></div></div>
         <template v-else>
           <div class="rounded-card border border-line bg-surface p-5">
             <h2 class="mb-3 text-[16px] font-semibold text-ink">{{ detail.scenarioType === 'IN_BASKET' ? '제출 답안' : '대화 기록' }}</h2>
@@ -56,10 +62,10 @@
           <article v-for="e in detail.evaluations || []" :key="e.competency" class="rounded-card border border-line bg-surface p-5">
             <div class="mb-3 flex items-baseline justify-between gap-3">
               <h3 class="text-[16px] font-semibold text-ink">{{ e.competency }}</h3>
-              <span class="text-[13px] text-muted">AI 점수 <b class="text-[16px] font-semibold tabular-nums text-ink">{{ e.aiScore }}</b> / 5</span>
+              <span class="flex shrink-0 items-center gap-3 text-[13px] text-muted"><span class="hidden w-24 gap-[2px] sm:flex" aria-hidden="true"><span v-for="n in 5" :key="n" class="h-1.5 flex-1 rounded-[2px]" :class="n <= Math.round(Number(e.aiScore) || 0) ? 'bg-accent' : 'bg-track'"></span></span><span>AI 점수 <b class="text-[16px] font-semibold tabular-nums text-ink">{{ e.aiScore }}</b> / 5</span></span>
             </div>
             <ul v-if="e.aiEvidence?.length" class="mb-3 space-y-1">
-              <li v-for="(ev, i) in e.aiEvidence" :key="i" class="whitespace-pre-wrap border-l-2 border-line pl-3 text-[14px] leading-6 text-muted">“{{ ev }}”</li>
+              <li v-for="(ev, i) in e.aiEvidence" :key="i" class="whitespace-pre-wrap rounded-control bg-ground px-3 py-2 text-[14px] leading-6 text-ink">“{{ ev }}”</li>
             </ul>
             <p class="whitespace-pre-wrap text-[14px] leading-6 text-ink">{{ e.aiFeedback }}</p>
 
@@ -77,12 +83,14 @@
             </div>
           </article>
 
-          <div v-if="editable" class="rounded-card border border-line bg-surface p-5">
+          <div v-if="editable" class="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface p-5">
+            <p class="text-[13px] text-muted">역량 {{ (detail.evaluations || []).length }}개의 최종 점수를 모두 입력한 뒤 확정합니다.</p>
             <p v-if="confirmError" class="mb-3 text-[13px] text-negative" role="alert">{{ confirmError }}</p>
             <button @click="confirm" :disabled="confirming" class="h-11 w-full rounded-control bg-primary px-6 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 sm:w-auto md:h-10">확정</button>
           </div>
         </template>
       </section>
+      <div v-else class="hidden min-h-[200px] items-center justify-center self-stretch rounded-card border border-dashed border-dash px-5 py-10 text-center text-[14px] text-muted lg:flex">왼쪽 검토 목록에서 응시 건을 고르면 답안과 채점 내용이 여기에 보입니다.</div>
     </div>
   </div>
 </template>

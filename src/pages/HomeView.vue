@@ -2,18 +2,21 @@
   <div>
     <PageHeader title="평가 홈" :subtitle="subtitle" />
 
-    <div v-if="loading" class="mb-6 h-[62px]" aria-hidden="true"></div>
-    <div v-else-if="current" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-accentLine bg-accentTint px-4 py-3">
+    <div v-if="loading" class="mb-3 h-[136px] rounded-card border border-line bg-surface" aria-hidden="true"></div>
+    <!-- 이 화면의 질문 "지금 무엇을 이어서 하면 되는가"에 답하는 가장 큰 블록 -->
+    <section v-else-if="current" class="mb-3 grid gap-4 rounded-card border border-line bg-surface p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-6" aria-labelledby="home-current">
       <div class="min-w-0">
-        <div class="text-[12px] text-muted">이어서 진행하기{{ counts.inProgress > 1 ? ` · 진행 중 ${counts.inProgress}건` : '' }}</div>
-        <div class="truncate text-[14px] font-medium text-ink">{{ current.scenarioTitle }}</div>
+        <p class="text-[12px] text-muted">이어서 진행할 평가{{ counts.inProgress > 1 ? ` · 진행 중 ${counts.inProgress}건` : '' }}</p>
+        <h2 id="home-current" class="mt-1 truncate text-[18px] font-semibold leading-7 text-ink">{{ current.scenarioTitle }}</h2>
+        <p class="mt-0.5 text-[13px] text-muted tabular-nums">{{ typeLabel(current.scenarioType) }} · {{ modeLabel(current.mode) }} · {{ formatDate(current.createdAt) || '–' }} 시작</p>
+        <div class="mt-4 max-w-[420px]"><StageTrack :stage="current.stage" :mode="current.mode" size="full" /></div>
       </div>
       <button
         type="button"
-        class="h-11 rounded-control bg-primary px-4 md:h-10 text-[14px] font-medium text-white hover:bg-primaryHover"
+        class="h-11 justify-self-start rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover md:h-10"
         @click="openSession(current)"
       >이어서 진행</button>
-    </div>
+    </section>
 
     <StatStrip :items="stats" />
 
@@ -21,13 +24,13 @@
 
     <section v-if="!loadFailed" class="mt-8" aria-labelledby="home-tasks">
       <div class="mb-3 flex items-baseline justify-between gap-3">
-        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제<template v-if="!loading && scenarios.length"> <span class="ml-1.5 text-[13px] font-medium text-accent" aria-hidden="true">{{ scenarios.length }}</span><span class="sr-only">{{ scenarios.length }}건</span></template></h2>
+        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제<template v-if="!loading && scenarios.length"> <span class="ml-1 text-[14px] font-normal text-muted tabular-nums" aria-hidden="true">{{ scenarios.length }}</span><span class="sr-only">{{ scenarios.length }}건</span></template></h2>
         <RouterLink to="/tasks" class="-my-3 inline-flex min-h-11 items-center py-3 text-[13px] text-muted hover:text-ink hover:underline md:my-0 md:min-h-0 md:py-0">전체 보기</RouterLink>
       </div>
       <ListPlaceholder v-if="loading" variant="cards" :count="2" />
       <EmptyState v-else-if="!scenarios.length" message="등록된 평가 과제가 없습니다." />
-      <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <ScenarioCard v-for="s in scenarios" :key="s.id" :scenario="s" :info="infoOf(s.id)" @start="begin" />
+      <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <ScenarioCard v-for="s in scenarios" :key="s.id" :scenario="s" :info="infoOf(s.id)" :sessions="sessions" @start="begin" />
       </div>
     </section>
 
@@ -55,6 +58,8 @@ import SessionRows from '../components/SessionRows.vue';
 import LoadError from '../components/LoadError.vue';
 import ListPlaceholder from '../components/ListPlaceholder.vue';
 import StartModal from '../components/StartModal.vue';
+import StageTrack from '../components/ui/StageTrack.vue';
+import { formatDate, modeLabel, typeLabel } from '../composables/stage';
 import { useSessions } from '../composables/useSessions';
 import { useScenarioCards } from '../composables/useScenarioCards';
 

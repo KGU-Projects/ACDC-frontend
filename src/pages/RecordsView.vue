@@ -20,20 +20,23 @@
               <th scope="col" class="w-[42%] px-4 py-2.5 font-normal">과제</th>
               <th scope="col" class="px-4 py-2.5 font-normal">유형</th>
               <th scope="col" class="px-4 py-2.5 font-normal">모드</th>
-              <th scope="col" class="px-4 py-2.5 font-normal">시작일</th>
-              <th scope="col" class="px-4 py-2.5 font-normal">단계</th>
+              <th scope="col" class="px-4 py-2.5 text-right font-normal">시작일</th>
+              <th scope="col" class="w-[208px] px-5 py-2.5 font-normal">진행 단계</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-rule">
             <tr v-for="s in sessions" :key="s.id" :class="clickable(s) ? 'cursor-pointer hover:bg-hover' : ''" @click="clickable(s) && openSession(s)">
-              <td class="max-w-0 px-4 py-3 text-ink">
+              <td class="h-[60px] max-w-0 px-4 py-3 text-ink">
                 <button v-if="clickable(s)" type="button" class="block max-w-full truncate text-left font-medium hover:underline" @click.stop="openSession(s)">{{ s.scenarioTitle }}</button>
                 <span v-else class="block truncate font-medium">{{ s.scenarioTitle }}</span>
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-muted">{{ typeLabel(s.scenarioType) }}</td>
               <td class="whitespace-nowrap px-4 py-3 text-muted">{{ modeLabel(s.mode) }}</td>
-              <td class="whitespace-nowrap px-4 py-3 text-muted tabular-nums">{{ formatDate(s.createdAt) || '–' }}</td>
-              <td class="whitespace-nowrap px-4 py-3"><StatusPill :label="stageLabel(s.stage)" :tone="stageTone(s.stage)" /></td>
+              <td class="whitespace-nowrap px-4 py-3 text-right text-muted tabular-nums">{{ formatDate(s.createdAt) || '–' }}</td>
+              <td class="px-5 py-3">
+                <span class="mb-1.5 block truncate text-[12px] font-medium leading-4" :class="s.stage === 'FAILED' || s.stage === 'ABORTED' ? 'text-negative' : 'text-ink'">{{ stageLabel(s.stage) }}</span>
+                <StageTrack :stage="s.stage" :mode="s.mode" />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -48,12 +51,12 @@
 <script setup>
 import PageHeader from '../components/ui/PageHeader.vue';
 import EmptyState from '../components/ui/EmptyState.vue';
-import StatusPill from '../components/ui/StatusPill.vue';
+import StageTrack from '../components/ui/StageTrack.vue';
 import LoadError from '../components/LoadError.vue';
 import ListPlaceholder from '../components/ListPlaceholder.vue';
 import SessionRows from '../components/SessionRows.vue';
 import { useSessions } from '../composables/useSessions';
-import { canOpenResult, formatDate, modeLabel, stageLabel, stageTone, typeLabel } from '../composables/stage';
+import { canOpenResult, formatDate, modeLabel, stageLabel, typeLabel } from '../composables/stage';
 
 const { sessions, loading, loadFailed, refresh, openSession } = useSessions();
 const clickable = (s) => s.stage === 'IN_PROGRESS' || canOpenResult(s.stage);
