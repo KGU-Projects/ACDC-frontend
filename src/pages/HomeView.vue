@@ -21,7 +21,7 @@
 
     <section v-if="!loadFailed" class="mt-8" aria-labelledby="home-tasks">
       <div class="mb-3 flex items-baseline justify-between gap-3">
-        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제<span v-if="!loading && scenarios.length" class="ml-1.5 text-[13px] font-medium text-accent">{{ scenarios.length }}</span></h2>
+        <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제<template v-if="!loading && scenarios.length"> <span class="ml-1.5 text-[13px] font-medium text-accent" aria-hidden="true">{{ scenarios.length }}</span><span class="sr-only">{{ scenarios.length }}건</span></template></h2>
         <RouterLink to="/tasks" class="-my-3 inline-flex min-h-11 items-center py-3 text-[13px] text-muted hover:text-ink hover:underline md:my-0 md:min-h-0 md:py-0">전체 보기</RouterLink>
       </div>
       <ListPlaceholder v-if="loading" variant="cards" :count="2" />

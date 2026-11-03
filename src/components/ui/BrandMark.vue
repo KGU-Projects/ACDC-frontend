@@ -6,7 +6,7 @@
       <path d="M16.5 14 L28 3.5 M20.5 3.5 H28 V11" stroke="var(--accent)" stroke-width="2.8" stroke-linecap="square" stroke-linejoin="miter" />
     </svg>
     <span class="inline-flex flex-col leading-none">
-      <span class="font-bold text-ink" :class="s.word" style="letter-spacing: -0.03em">AC/DC</span>
+      <span class="font-bold tracking-[-0.03em] text-ink" :class="s.word">AC/DC</span>
       <span class="text-muted" :class="s.sub">역량평가 포털</span>
     </span>
   </span>
@@ -20,7 +20,7 @@ const props = defineProps({
   size: { type: String, default: 'md', validator: (v) => ['sm', 'md', 'lg'].includes(v) }
 });
 const SIZES = {
-  sm: { icon: 24, gap: 'gap-1.5', word: 'text-[16px]', sub: 'mt-0.5 text-[11px]' },
+  sm: { icon: 24, gap: 'gap-1.5', word: 'text-[16px]', sub: 'mt-0.5 text-[12px]' },
   md: { icon: 40, gap: 'gap-2.5', word: 'text-[22px]', sub: 'mt-1 text-[12px]' },
   lg: { icon: 60, gap: 'gap-3.5', word: 'text-[32px]', sub: 'mt-1.5 text-[14px]' }
 };

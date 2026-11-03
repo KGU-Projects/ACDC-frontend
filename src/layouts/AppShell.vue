@@ -51,13 +51,13 @@
           <AppIcon name="close" :size="20" />
         </button>
       </div>
-      <SideNavContent :groups="groups" :is-active="isActive" :badge-for="badgeFor" :user="user" show-user mobile @logout="handleLogout" />
+      <SideNavContent :groups="groups" :is-active="isActive" :badge-for="badgeFor" :user="user" show-user mobile id-prefix="navgroup-m" @logout="handleLogout" />
     </div>
 
     <div class="md:flex">
       <!-- 데스크톱 사이드바 (상단 바 아래) -->
       <aside class="hidden border-r border-line bg-rail md:sticky md:top-16 md:flex md:h-[calc(100vh-4rem)] md:w-60 md:shrink-0 md:flex-col">
-        <SideNavContent :groups="groups" :is-active="isActive" :badge-for="badgeFor" :user="user" @logout="handleLogout" />
+        <SideNavContent :groups="groups" :is-active="isActive" :badge-for="badgeFor" />
       </aside>
 
       <main class="min-w-0 flex-1">
