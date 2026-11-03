@@ -1,85 +1,51 @@
 <template>
-  <div class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans">
-    <div class="bg-white shadow-2xl rounded-2xl flex flex-col max-w-sm sm:max-w-md w-full overflow-hidden my-8">
+  <div class="flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-10">
+    <div class="w-full max-w-[400px]">
+      <div class="mb-6"><BrandMark /></div>
 
-      <div class="w-full bg-brandLight/40 py-8 px-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand/10 to-transparent"></div>
+      <div class="rounded-card border border-line bg-surface p-6 sm:p-8">
+        <h1 class="text-[24px] font-semibold leading-8 text-ink">회원가입</h1>
 
-        <div class="relative z-10 w-full flex flex-col items-center">
-          <h1 class="text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">AC/DC</h1>
-          <p class="text-brand font-semibold text-sm mb-6">AC/DC 역량평가 시뮬레이터</p>
-
-          <div class="relative w-24 h-24 mx-auto flex justify-center items-center mb-5">
-            <div class="absolute inset-0 border-4 border-brand/30 rounded-2xl animate-[pulse_2s_ease-in-out_infinite]"></div>
-            <div class="absolute inset-2 border-2 border-brand/50 rounded-xl border-dashed animate-[spin_15s_linear_infinite]"></div>
-            <svg class="w-10 h-10 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8v-2a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 8v2a2 2 0 0 1-2 2h-2m-10 0h-2a2 2 0 0 1-2-2v-2"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 10a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 14c0-2-2-3-4-3s-4 1-4 3v1h8v-1z"></path>
-            </svg>
-          </div>
-
-          <div class="flex flex-col gap-1.5 text-[11px] sm:text-xs text-slate-600 font-medium">
-            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 서류함·역할수행 과제 실습</p>
-            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> AI 상대역 면담과 자동 채점·피드백</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full p-6 sm:p-8">
-        <div class="mb-5">
-          <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-1">계정 만들기 ✨</h2>
-          <p class="text-slate-500 text-xs">기본 정보를 입력하고 역량평가 연습을 시작하세요.</p>
-        </div>
-
-        <form @submit.prevent="handleSignup">
+        <form class="mt-6" @submit.prevent="handleSignup">
           <div class="mb-4">
-            <label for="name" class="block text-slate-700 text-xs font-bold mb-1.5">이름</label>
-            <input v-model="name" type="text" id="name" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all duration-300 text-sm" placeholder="홍길동" :disabled="isSubmitting" required>
+            <label for="name" class="field-label">이름</label>
+            <input v-model="name" type="text" id="name" class="field-input" autocomplete="name" :disabled="isSubmitting" required>
           </div>
 
           <div class="mb-4">
-            <label for="email" class="block text-slate-700 text-xs font-bold mb-1.5">이메일</label>
-            <input v-model="email" type="email" id="email" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all duration-300 text-sm" placeholder="user@example.com" :disabled="isSubmitting" required>
+            <label for="email" class="field-label">이메일</label>
+            <input v-model="email" type="email" id="email" class="field-input" placeholder="user@example.com" autocomplete="email" :disabled="isSubmitting" required>
           </div>
 
           <div class="mb-4">
-            <label for="password" class="block text-slate-700 text-xs font-bold mb-1.5">비밀번호</label>
-            <input v-model="password" type="password" id="password" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all duration-300 text-sm" placeholder="••••••••" :disabled="isSubmitting" required>
-            <p class="text-[10px] text-slate-400 mt-1 ml-1">영문, 숫자 포함 8자 이상</p>
+            <label for="password" class="field-label">비밀번호</label>
+            <input v-model="password" type="password" id="password" class="field-input" autocomplete="new-password" :disabled="isSubmitting" required>
+            <p class="field-hint">영문, 숫자 포함 8자 이상</p>
           </div>
 
           <div class="mb-5">
-            <label for="passwordConfirm" class="block text-slate-700 text-xs font-bold mb-1.5">비밀번호 확인</label>
-            <input v-model="passwordConfirm" type="password" id="passwordConfirm" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all duration-300 text-sm" placeholder="••••••••" :disabled="isSubmitting" required>
+            <label for="passwordConfirm" class="field-label">비밀번호 확인</label>
+            <input v-model="passwordConfirm" type="password" id="passwordConfirm" class="field-input" autocomplete="new-password" :disabled="isSubmitting" required>
           </div>
 
-          <div class="mb-6 flex items-start">
-            <div class="flex items-center h-4 mt-0.5">
-              <input v-model="terms" id="terms" type="checkbox" class="w-3.5 h-3.5 text-brand bg-slate-100 border-slate-300 rounded focus:ring-brand focus:ring-2" :disabled="isSubmitting" required>
-            </div>
-            <label for="terms" class="ml-2 text-[11px] text-slate-600 leading-snug">
-              <a href="#" class="font-semibold text-brand hover:underline">이용약관</a> 및 <a href="#" class="font-semibold text-brand hover:underline">개인정보 처리방침</a>에 동의합니다.
+          <div class="mb-5 flex items-start gap-2">
+            <input v-model="terms" id="terms" type="checkbox" class="mt-[3px] h-4 w-4 shrink-0 accent-[#1b2a3d]" :disabled="isSubmitting" required>
+            <label for="terms" class="text-[14px] leading-snug text-muted">
+              <a href="#" class="link-text">이용약관</a> 및 <a href="#" class="link-text">개인정보 처리방침</a>에 동의합니다.
             </label>
           </div>
 
-          <p v-if="errorMessage" class="mb-4 text-xs font-bold text-rose-500">
-            {{ errorMessage }}
-          </p>
+          <p v-if="errorMessage" class="field-error mb-3" role="alert">{{ errorMessage }}</p>
 
-          <button type="submit" :disabled="isSubmitting" class="w-full bg-brand hover:bg-brandHover disabled:bg-slate-300 disabled:shadow-none disabled:transform-none text-white font-bold py-3 rounded-xl shadow-lg shadow-brand/30 hover:shadow-brand/50 transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
-            {{ isSubmitting ? '가입 중...' : 'AC/DC 시작하기' }}
+          <button type="submit" :disabled="isSubmitting" class="btn-primary">
+            {{ isSubmitting ? '가입 중...' : '가입하기' }}
           </button>
         </form>
 
-        <div class="mt-5 flex items-center justify-between">
-          <span class="border-b w-1/4 border-slate-200"></span>
-          <span class="text-[10px] text-center text-slate-400 font-medium uppercase">또는</span>
-          <span class="border-b w-1/4 border-slate-200"></span>
-        </div>
+        <div class="my-5 border-t border-rule"></div>
 
-        <button @click="startGoogleLogin" :disabled="isSubmitting" class="w-full mt-5 py-2.5 border border-slate-200 rounded-xl text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-60 font-bold flex items-center justify-center gap-2 transition-colors text-sm">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button type="button" @click="startGoogleLogin" :disabled="isSubmitting" class="btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -87,12 +53,12 @@
           </svg>
           Google 계정으로 가입하기
         </button>
-
-        <p class="mt-5 text-center text-xs text-slate-600 font-medium">
-          이미 계정이 있으신가요?
-          <a href="#" @click.prevent="goToLogin" class="font-bold text-brand hover:text-brandHover hover:underline transition-colors ml-1">로그인</a>
-        </p>
       </div>
+
+      <p class="mt-5 text-center text-[14px] text-muted">
+        이미 계정이 있으신가요?
+        <a href="#" @click.prevent="goToLogin" class="link-text ml-1">로그인</a>
+      </p>
     </div>
   </div>
 </template>
@@ -100,6 +66,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import BrandMark from '../components/ui/BrandMark.vue';
 import { getGoogleOAuthUrl, saveAuthSession, signup } from '../api/auth';
 
 // 입력 변수들 준비

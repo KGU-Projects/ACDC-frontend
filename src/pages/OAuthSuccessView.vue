@@ -1,21 +1,14 @@
 <template>
-  <div class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white shadow-2xl rounded-2xl flex flex-col max-w-sm sm:max-w-md w-full overflow-hidden h-[85vh] sm:h-[90vh] items-center justify-center p-8">
+  <div class="flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-10">
+    <div class="w-full max-w-[400px]">
+      <div class="mb-6"><BrandMark /></div>
 
-      <div class="relative w-28 h-28 mb-8 flex justify-center items-center">
-        <div class="absolute inset-0 border-4 border-brand/20 rounded-2xl animate-[pulse_2s_ease-in-out_infinite]"></div>
-        <div class="absolute inset-2 border-2 border-brand/40 rounded-xl border-dashed animate-[spin_4s_linear_infinite]"></div>
-        <div class="w-4 h-4 bg-brand rounded-full animate-ping absolute"></div>
-        <div class="w-3 h-3 bg-brand rounded-full absolute"></div>
-      </div>
-
-      <div class="text-center">
-        <h2 :class="['text-xl font-bold mb-2', isError ? 'text-rose-500' : 'text-slate-800']">
+      <div class="rounded-card border border-line bg-surface p-6 sm:p-8" role="status" aria-live="polite">
+        <h1 class="text-[24px] font-semibold leading-8" :class="isError ? 'text-negative' : 'text-ink'">
           {{ statusTitle }}
-        </h2>
-        <p class="text-slate-400 text-sm leading-relaxed" v-html="statusDesc"></p>
+        </h1>
+        <p class="mt-2 text-[14px] leading-relaxed text-muted" v-html="statusDesc"></p>
       </div>
-
     </div>
   </div>
 </template>
@@ -23,6 +16,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import BrandMark from '../components/ui/BrandMark.vue';
 import { exchangeOAuthCode, saveAuthSession } from '../api/auth';
 
 // route는 주소창 정보를 읽을 때, router는 화면을 이동할 때 사용합니다.
