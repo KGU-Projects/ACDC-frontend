@@ -24,6 +24,7 @@ export function useMediaCapture() {
   const requesting = ref(false)
 
   const start = async () => {
+    if (requesting.value) return null // 이미 요청 중이면 getUserMedia를 겹쳐 부르지 않는다(스트림 누수 방지)
     error.value = ''
     if (!navigator.mediaDevices?.getUserMedia) {
       error.value = '이 브라우저(또는 접속 환경)에서는 카메라와 마이크를 사용할 수 없습니다. HTTPS 또는 localhost에서 Chrome으로 접속해주세요.'

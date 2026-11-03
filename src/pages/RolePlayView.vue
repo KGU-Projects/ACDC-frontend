@@ -27,7 +27,7 @@
         :session-id="sessionId"
         :scenario="scenario"
         :remaining-label="label"
-        :can-start="!starting"
+        :can-start="!starting && !requesting"
         :media-error="mediaError"
         :requesting="requesting"
         :show-skip="demoSkip"
@@ -35,6 +35,8 @@
         @skip="startFromPrep"
         @retry-media="checkDevices"
       />
+
+      <p v-else-if="phase === 'loading'" class="text-center text-slate-400 text-sm mt-20">불러오는 중...</p>
 
       <!-- 권한 요청: 카메라·마이크 스트림이 있어야 면담에 들어간다 -->
       <div v-else-if="phase === 'permission'" class="flex-grow flex items-center justify-center min-h-0">
@@ -152,7 +154,7 @@ const { remaining, label, start: startCountdown, stop: stopCountdown } = useCoun
 
 // prep(과제 숙지) → call(면담). permission은 면담 차례인데 카메라·마이크 스트림이 없을 때 머무는 상태.
 // call로 가는 길은 enterCall 하나뿐이고, enterCall이 스트림을 확인한다.
-const phase = ref('permission');
+const phase = ref('loading'); // 최초 로드가 끝나기 전에는 loading
 const starting = ref(false);
 const permissionWarning = ref('');
 const demoSkip = import.meta.env.VITE_DEMO_SKIP === 'true';
@@ -190,8 +192,13 @@ const speakFor = (text) => {
 };
 
 // 면담 진입의 유일한 경로. 스트림이 없으면 전환하지 않고 권한 요청 상태로 보낸다.
+const hasLiveStream = () => {
+  const tracks = mediaStream.value?.getTracks() || [];
+  return tracks.length > 0 && tracks.every((t) => t.readyState === 'live');
+};
+
 const enterCall = async (callSeconds) => {
-  if (!mediaStream.value) {
+  if (!hasLiveStream()) {
     stopCountdown();
     permissionWarning.value = PERMISSION_WARNING;
     phase.value = 'permission';
@@ -201,7 +208,7 @@ const enterCall = async (callSeconds) => {
   permissionWarning.value = '';
   phase.value = 'call';
   await bindStream(selfVideoRef);
-  if (phase.value !== 'call' || !mediaStream.value) return false;
+  if (phase.value !== 'call' || !hasLiveStream()) return false;
   startCountdown(callSeconds, submit);
   audio.start(mediaStream.value);
   const video = selfVideoRef.value;
@@ -217,6 +224,7 @@ const enterCall = async (callSeconds) => {
 // 서버에 면담 시작을 알리고(멱등) 면담 남은 시간을 받아 진입한다.
 const beginCall = async () => {
   const res = await startCallApi(sessionId);
+  stopCountdown(); // 응답을 받은 뒤에만 숙지 시계를 멈춘다(실패하면 계속 돌아 만료 시 재시도된다)
   return enterCall(res.remainingSeconds);
 };
 
@@ -226,23 +234,30 @@ const startFromPrep = async () => {
   starting.value = true;
   errorMessage.value = '';
   try {
-    if (!mediaStream.value) {
+    if (!hasLiveStream()) {
       errorMessage.value = PERMISSION_WARNING;
       await checkDevices();
-      if (!mediaStream.value) return;
+      // 권한 대기 중에 숙지 시간이 끝났다면 만료 처리(startCall 후 permission)를 이어서 한다.
+      if (!hasLiveStream() && remaining.value > 0) return;
       errorMessage.value = '';
     }
     if (phase.value !== 'prep') return;
-    stopCountdown();
     await beginCall();
   } catch (error) {
     errorMessage.value = error.message || '면담을 시작하지 못했습니다.';
+    if (remaining.value <= 0) scheduleExpiryRetry();
   } finally {
     starting.value = false;
   }
 };
 
 // 숙지 시간 만료: 서버상 면담은 시작된 것으로 계산된다. 스트림이 없으면 permission으로 간다.
+let expiryRetryTimer = null;
+const scheduleExpiryRetry = () => {
+  clearTimeout(expiryRetryTimer);
+  expiryRetryTimer = setTimeout(onPrepExpired, 3000);
+};
+
 const onPrepExpired = async () => {
   if (starting.value || phase.value !== 'prep') return;
   starting.value = true;
@@ -250,6 +265,7 @@ const onPrepExpired = async () => {
     await beginCall();
   } catch (error) {
     errorMessage.value = error.message || '면담을 시작하지 못했습니다.';
+    scheduleExpiryRetry();
   } finally {
     starting.value = false;
   }
@@ -398,6 +414,8 @@ onMounted(async () => {
         phase.value = 'prep';
         startCountdown(prep.prepRemainingSeconds, onPrepExpired);
         await checkDevices();
+        // 숙지가 이미 끝나(만료 처리로) permission이 된 경우, 스트림을 얻었으면 바로 면담으로 간다.
+        if (phase.value === 'permission' && hasLiveStream() && !starting.value) await retryFromPermission();
         return;
       }
     }
@@ -412,6 +430,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   recognition?.abort();
   clearTimeout(speakingTimer);
+  clearTimeout(expiryRetryTimer);
   stopCapture();
 });
 </script>
