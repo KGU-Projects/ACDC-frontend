@@ -7,11 +7,11 @@
 
     <div v-else-if="session" class="max-w-7xl mx-auto flex flex-col h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)]">
       <header class="px-5 py-3 flex items-center justify-between" :class="phase === 'call' ? 'fixed top-0 inset-x-0 z-50 bg-slate-900/60 backdrop-blur-sm text-white' : 'bg-white rounded-2xl shadow mb-3'">
-        <div>
-          <h1 class="text-base font-extrabold" :class="phase === 'call' ? 'text-white' : 'text-slate-800'">{{ session.scenarioTitle }}</h1>
-          <p class="text-[11px]" :class="phase === 'call' ? 'text-white/70' : 'text-slate-400'">역할수행 · 상대역 {{ counterpart.name }} {{ counterpart.position }}</p>
+        <div class="min-w-0">
+          <h1 class="text-base font-extrabold truncate" :class="phase === 'call' ? 'text-white' : 'text-slate-800'">{{ session.scenarioTitle }}</h1>
+          <p class="text-[11px] truncate" :class="phase === 'call' ? 'text-white/70' : 'text-slate-400'">역할수행 · 상대역 {{ counterpart.name }} {{ counterpart.position }}</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 shrink-0">
           <span v-if="phase === 'call'" class="font-mono text-lg font-bold" :class="remaining <= 120 ? 'text-rose-400' : phase === 'call' ? 'text-white' : 'text-slate-700'">{{ label }}</span>
           <button @click="submit" :disabled="phase !== 'call' || submitting || sending" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
             {{ submitting ? '채점 중...' : '면담 종료·제출' }}
@@ -19,7 +19,7 @@
         </div>
       </header>
 
-      <p v-if="errorMessage" class="text-xs font-bold" :class="phase === 'call' ? 'fixed top-16 inset-x-0 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-rose-500/90 text-white px-4 py-1.5' : 'mb-2 text-rose-500'">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="text-xs font-bold" :class="phase === 'call' ? 'fixed top-[4.5rem] inset-x-0 z-50 mx-auto w-fit max-w-[90%] rounded-full bg-rose-500/90 text-white px-4 py-1.5' : 'mb-2 text-rose-500'">{{ errorMessage }}</p>
 
       <!-- 과제 숙지 -->
       <PrepPanel
@@ -29,11 +29,13 @@
         :remaining-label="label"
         :can-start="!starting && !requesting"
         :media-error="mediaError"
+        :stream="mediaStream"
         :requesting="requesting"
         :show-skip="demoSkip"
         @start="startFromPrep"
         @skip="startFromPrep"
         @retry-media="checkDevices"
+        @leave="leave"
       />
 
       <p v-else-if="phase === 'loading'" class="text-center text-slate-400 text-sm mt-20">불러오는 중...</p>
@@ -65,7 +67,7 @@
         <CounterpartAvatar :name="counterpart.name" :position="counterpart.position" :speaking="aiSpeaking" :thinking="sending" />
 
         <!-- 채팅 오버레이: 헤더 아래부터 끝까지, 왼쪽 35%(좁은 화면은 넓게, 접기 가능) -->
-        <div :class="chatOpen ? '' : 'max-lg:hidden'" class="absolute left-0 top-[3.75rem] bottom-0 z-20 w-[85%] sm:w-[50%] lg:w-[35%]">
+        <div :class="chatOpen ? '' : 'max-lg:hidden'" class="absolute left-0 top-[4.5rem] bottom-0 z-20 w-[85%] sm:w-[50%] lg:w-[35%]">
           <CallChatOverlay
             v-model:draft="draft"
             :messages="messages"
@@ -79,7 +81,7 @@
           />
         </div>
         <button @click="chatOpen = !chatOpen" class="lg:hidden absolute left-3 bottom-3 z-30 rounded-full bg-slate-900/70 text-white text-xs font-bold px-3 py-2 shadow" :class="chatOpen ? 'hidden' : ''">채팅 열기</button>
-        <button v-if="chatOpen" @click="chatOpen = false" class="lg:hidden absolute left-[calc(85%-2.25rem)] sm:left-[calc(50%-2.25rem)] top-[4.25rem] z-30 w-7 h-7 rounded-full bg-slate-900/70 text-white text-sm font-bold" title="채팅 접기">×</button>
+        <button v-if="chatOpen" @click="chatOpen = false" class="lg:hidden absolute left-[calc(85%-2.25rem)] sm:left-[calc(50%-2.25rem)] top-[4.75rem] z-30 w-7 h-7 rounded-full bg-slate-900/70 text-white text-sm font-bold" title="채팅 접기">×</button>
 
         <div class="absolute right-3 bottom-3 z-30 w-32 sm:w-52 aspect-video rounded-xl overflow-hidden border-2 border-white/70 shadow-lg bg-slate-800 transition-opacity" :class="chatOpen ? 'max-sm:opacity-0 max-sm:pointer-events-none' : ''" data-testid="self-view">
           <video ref="selfVideoRef" autoplay muted playsinline class="w-full h-full object-cover -scale-x-100"></video>
@@ -377,7 +379,9 @@ onMounted(async () => {
       // 첫 대사는 화면에만 보여 준다(서버 대화 기록에는 사용자 발화부터 쌓인다).
       messages.value.push({ speaker: 'AI', text: data.scenario.openingLine });
     }
-    if (data.phase === 'PREP') {
+    // 새 세션은 phase가 null이고 시나리오에 숙지 시간이 있으면 여기서 숙지를 시작한다(서버가 시각을 기록).
+    const prepPending = data.phase == null && data.status === 'READY' && Number(data.scenario?.prepMinutes) > 0;
+    if (data.phase === 'PREP' || prepPending) {
       // 서버가 시계를 소유한다. 새로고침해도 서버가 멱등이라 남은 시간이 늘지 않는다.
       const prep = await startPrep(sessionId);
       if (prep.phase === 'PREP') {

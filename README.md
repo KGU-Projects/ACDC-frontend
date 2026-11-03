@@ -34,6 +34,7 @@ npm run build            # dist/ 생성
 | `VITE_BACKEND_BASE_URL` | 필수 | 브라우저가 접근하는 백엔드 주소. 예: `http://localhost:8080` |
 | `VITE_API_BASE_URL` | 선택 | API 호출 기준 주소. 기본값은 `VITE_BACKEND_BASE_URL` |
 | `VITE_MEDIAPIPE_WASM_URL` | 선택 | MediaPipe wasm 주소. 기본값은 jsDelivr CDN(`tasks-vision@0.10.18`) |
+| `VITE_DEMO_SKIP` | 개발·데모 전용 | `true`면 과제 숙지 화면에 건너뛰기 버튼이 보인다. 운영에서는 설정하지 않는다 |
 | `VITE_FACE_LANDMARKER_MODEL_URL` | 선택 | 얼굴 랜드마크 모델 주소. 기본값은 Google 공개 저장소 |
 
 Vite는 **빌드 시점**에 값을 번들에 넣습니다. 값을 바꾸면 다시 빌드해야 합니다.
