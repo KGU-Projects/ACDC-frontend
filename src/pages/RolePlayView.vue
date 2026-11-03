@@ -46,6 +46,7 @@
       <div v-else class="flex-grow grid grid-cols-1 lg:grid-cols-5 gap-3 min-h-0">
         <section class="lg:col-span-2 bg-white rounded-2xl shadow p-5 overflow-y-auto text-sm text-slate-700 leading-relaxed min-h-0 max-h-60 lg:max-h-none">
           <div class="space-y-4">
+            <a v-if="scenario.materialsPdf" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block text-xs font-bold text-brand">과제 원본 PDF 보기 (새 탭)</a>
             <div v-if="scenario.situation"><h3 class="font-bold text-slate-800 mb-1">상황</h3><p class="whitespace-pre-wrap">{{ scenario.situation }}</p></div>
             <div v-if="scenario.participantRole"><h3 class="font-bold text-slate-800 mb-1">나의 역할</h3><p class="whitespace-pre-wrap">{{ scenario.participantRole }}</p></div>
             <div v-for="m in scenario.materials" :key="m.id" class="rounded-xl border border-slate-100 p-4">

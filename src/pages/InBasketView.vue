@@ -45,6 +45,11 @@
               </div>
             </div>
 
+            <div v-else-if="tab === 'pdf'" class="h-[70vh]">
+              <iframe :src="scenario.materialsPdf" title="과제 원본 PDF" class="w-full h-full rounded-xl border border-slate-200"></iframe>
+              <a :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block mt-2 text-xs font-bold text-brand">새 탭에서 열기</a>
+            </div>
+
             <div v-else class="space-y-4">
               <div v-for="m in scenario.materials" :key="m.id" class="rounded-xl border border-slate-100 p-4">
                 <h3 class="font-bold text-slate-800 mb-2">{{ m.title }}</h3>
@@ -85,11 +90,12 @@ const saveState = ref('');
 const { remaining, label, start: startCountdown, stop: stopCountdown } = useCountdown();
 
 const scenario = computed(() => session.value?.scenario || {});
-const tabs = [
+const tabs = computed(() => [
   { key: 'guide', label: '상황·요건' },
   { key: 'items', label: '안건' },
-  { key: 'materials', label: '자료' }
-];
+  { key: 'materials', label: '자료' },
+  ...(scenario.value.materialsPdf ? [{ key: 'pdf', label: '원본 PDF' }] : [])
+]);
 
 let saveTimer = null;
 let lastSaved = '';
