@@ -2,7 +2,8 @@
   <div>
     <PageHeader title="평가 홈" :subtitle="subtitle" />
 
-    <div v-if="current" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface px-4 py-3">
+    <div v-if="loading" class="mb-6 h-[62px]" aria-hidden="true"></div>
+    <div v-else-if="current" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface px-4 py-3">
       <div class="min-w-0">
         <div class="text-[12px] text-muted">이어서 진행하기{{ counts.inProgress > 1 ? ` · 진행 중 ${counts.inProgress}건` : '' }}</div>
         <div class="truncate text-[14px] font-medium text-ink">{{ current.scenarioTitle }}</div>
@@ -21,7 +22,7 @@
     <section v-if="!loadFailed" class="mt-8" aria-labelledby="home-tasks">
       <div class="mb-3 flex items-baseline justify-between gap-3">
         <h2 id="home-tasks" class="text-[16px] font-semibold text-ink">평가 과제</h2>
-        <RouterLink to="/tasks" class="text-[13px] text-muted hover:text-ink hover:underline">전체 보기</RouterLink>
+        <RouterLink to="/tasks" class="-my-3 inline-flex min-h-11 items-center py-3 text-[13px] text-muted hover:text-ink hover:underline md:my-0 md:min-h-0 md:py-0">전체 보기</RouterLink>
       </div>
       <ListPlaceholder v-if="loading" variant="cards" :count="2" />
       <EmptyState v-else-if="!scenarios.length" message="등록된 평가 과제가 없습니다." />
@@ -33,7 +34,7 @@
     <section v-if="!loadFailed" class="mt-8" aria-labelledby="home-recent">
       <div class="mb-3 flex items-baseline justify-between gap-3">
         <h2 id="home-recent" class="text-[16px] font-semibold text-ink">최근 응시 내역</h2>
-        <RouterLink to="/records" class="text-[13px] text-muted hover:text-ink hover:underline">전체 보기</RouterLink>
+        <RouterLink to="/records" class="-my-3 inline-flex min-h-11 items-center py-3 text-[13px] text-muted hover:text-ink hover:underline md:my-0 md:min-h-0 md:py-0">전체 보기</RouterLink>
       </div>
       <ListPlaceholder v-if="loading" variant="rows" :count="3" />
       <EmptyState v-else-if="!sessions.length" message="아직 응시한 평가가 없습니다." />
@@ -84,6 +85,7 @@ const stats = computed(() => [
 ]);
 
 const subtitle = computed(() => {
+  if (loading.value) return '\u00A0'; // 불러오는 동안 부제 줄 높이를 비워 두어 내용이 밀리지 않게 한다.
   if (!loaded.value) return '';
   if (counts.value.inProgress) return `진행 중인 평가 ${counts.value.inProgress}건`;
   if (counts.value.ready) return `확인할 수 있는 결과 ${counts.value.ready}건`;

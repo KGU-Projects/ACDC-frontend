@@ -87,12 +87,17 @@ watch(
     } else {
       document.body.style.overflow = '';
       previouslyFocused?.focus?.();
+      previouslyFocused = null;
     }
-  }
+  },
+  { immediate: true }
 );
 
 onBeforeUnmount(() => {
-  if (props.open) document.body.style.overflow = '';
+  if (props.open) {
+    document.body.style.overflow = '';
+    previouslyFocused?.focus?.();
+  }
 });
 </script>
 

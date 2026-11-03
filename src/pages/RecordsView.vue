@@ -9,7 +9,7 @@
     <LoadError v-else-if="loadFailed" @retry="refresh" />
     <EmptyState v-else-if="!sessions.length" message="아직 응시한 평가가 없습니다.">
       <template #action>
-        <RouterLink to="/tasks" class="text-[14px] font-medium text-ink underline underline-offset-2">평가 과제 보러 가기</RouterLink>
+        <RouterLink to="/tasks" class="inline-flex min-h-11 items-center text-[14px] font-medium text-ink underline underline-offset-2 md:min-h-0">평가 과제 보러 가기</RouterLink>
       </template>
     </EmptyState>
     <template v-else>

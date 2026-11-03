@@ -24,7 +24,7 @@
       </div>
 
       <div v-else-if="!session.evaluations?.length" class="rounded-card border border-line bg-surface px-5 py-8 text-[14px] text-muted">
-        아직 채점 결과가 없습니다. 상태: {{ stageLabel }}
+        채점 결과가 없습니다.
       </div>
 
       <div v-else class="space-y-4">

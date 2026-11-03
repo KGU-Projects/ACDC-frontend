@@ -107,8 +107,10 @@ export function useSessions() {
   const start = async (scenario, mode) => {
     starting.value = true;
     errorMessage.value = '';
+    const mine = epoch;
     try {
       const session = await createSession({ scenarioId: scenario.id, participantName: user?.name, mode });
+      if (mine !== epoch) return; // 요청 도중 계정이 바뀌었으면 이동하지 않는다.
       goTo(scenario.type, session.id);
     } catch (error) {
       errorMessage.value = error.message || '세션을 만들지 못했습니다.';
