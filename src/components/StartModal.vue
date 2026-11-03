@@ -7,7 +7,7 @@
         <input v-model="mode" type="radio" name="start-mode" value="PRACTICE" class="mt-1 accent-[#2a7a72]" />
         <span>
           <span class="block text-[14px] font-medium text-ink">연습</span>
-          <span class="block text-[13px] text-muted">횟수 제한 없이 연습할 수 있습니다.</span>
+          <span class="block text-[13px] text-muted">횟수 제한 없이 응시합니다. 채점이 끝나면(최대 1시간 이내) 결과를 확인할 수 있습니다.</span>
         </span>
       </label>
 
@@ -30,13 +30,13 @@
     <template #footer>
       <button
         type="button"
-        class="h-10 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50"
+        class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-10"
         :disabled="starting"
         @click="emit('close')"
       >취소</button>
       <button
         type="button"
-        class="h-10 rounded-control bg-primary px-4 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-60"
+        class="h-11 rounded-control bg-primary px-4 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-60 md:h-10"
         :disabled="starting"
         @click="submit"
       >{{ starting ? '시작하는 중…' : '시작하기' }}</button>

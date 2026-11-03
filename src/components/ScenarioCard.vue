@@ -12,7 +12,7 @@
     <div class="mt-5 flex flex-1 items-end">
       <button
         type="button"
-        class="h-10 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground"
+        class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground md:h-10"
         :aria-label="`${scenario.title} 시작`"
         @click="emit('start', scenario)"
       >시작</button>

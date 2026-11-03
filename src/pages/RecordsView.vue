@@ -2,9 +2,11 @@
   <div>
     <PageHeader title="나의 응시 내역" :subtitle="loading ? '' : `전체 ${sessions.length}건`" />
 
-    <p v-if="errorMessage" class="mb-4 text-[13px] text-negative" role="alert">{{ errorMessage }}</p>
-
-    <p v-if="loading" class="text-[14px] text-muted">불러오는 중…</p>
+    <template v-if="loading">
+      <ListPlaceholder class="hidden sm:block" variant="table" :count="4" />
+      <ListPlaceholder class="sm:hidden" variant="rows" :count="4" />
+    </template>
+    <LoadError v-else-if="loadFailed" @retry="refresh" />
     <EmptyState v-else-if="!sessions.length" message="아직 응시한 평가가 없습니다.">
       <template #action>
         <RouterLink to="/tasks" class="text-[14px] font-medium text-ink underline underline-offset-2">평가 과제 보러 가기</RouterLink>
@@ -14,8 +16,8 @@
       <div class="hidden overflow-hidden rounded-card border border-line bg-surface sm:block">
         <table class="w-full text-left text-[14px]">
           <thead>
-            <tr class="border-b border-line bg-ground text-[12px] font-normal text-muted">
-              <th scope="col" class="px-4 py-2.5 font-normal">과제</th>
+            <tr class="border-b border-line text-[12px] font-normal text-muted">
+              <th scope="col" class="w-[42%] px-4 py-2.5 font-normal">과제</th>
               <th scope="col" class="px-4 py-2.5 font-normal">유형</th>
               <th scope="col" class="px-4 py-2.5 font-normal">모드</th>
               <th scope="col" class="px-4 py-2.5 font-normal">시작일</th>
@@ -47,10 +49,12 @@
 import PageHeader from '../components/ui/PageHeader.vue';
 import EmptyState from '../components/ui/EmptyState.vue';
 import StatusPill from '../components/ui/StatusPill.vue';
+import LoadError from '../components/LoadError.vue';
+import ListPlaceholder from '../components/ListPlaceholder.vue';
 import SessionRows from '../components/SessionRows.vue';
 import { useSessions } from '../composables/useSessions';
 import { canOpenResult, formatDate, modeLabel, stageLabel, stageTone, typeLabel } from '../composables/stage';
 
-const { sessions, loading, errorMessage, openSession } = useSessions();
+const { sessions, loading, loadFailed, refresh, openSession } = useSessions();
 const clickable = (s) => s.stage === 'IN_PROGRESS' || canOpenResult(s.stage);
 </script>

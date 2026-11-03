@@ -17,6 +17,8 @@ const load = async (id) => {
       prepMinutes: Number.isFinite(prep) && prep > 0 ? prep : null
     };
   } catch {
+    // 일시 오류로 영구히 비지 않도록, 다음 호출에서 다시 시도할 수 있게 한다.
+    requested.delete(id);
     cache[id] = { competencies: null, prepMinutes: null };
   }
 };

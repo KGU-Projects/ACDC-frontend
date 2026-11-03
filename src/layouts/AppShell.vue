@@ -50,7 +50,7 @@ import AppIcon from '../components/ui/AppIcon.vue';
 import BrandMark from '../components/ui/BrandMark.vue';
 import SideNavContent from './SideNavContent.vue';
 import { getStoredUser, logout } from '../api/auth';
-import { useSessions } from '../composables/useSessions';
+import { resetSessions, useSessions } from '../composables/useSessions';
 
 // 세션 목록은 화면과 공유하는 싱글턴이라 폴링이 한 번만 돈다.
 const { counts } = useSessions();
@@ -81,6 +81,7 @@ const badgeFor = (item) => (item.badge && counts.value.inProgress > 0 ? counts.v
 
 const handleLogout = async () => {
   await logout();
+  resetSessions();
   sheetOpen.value = false;
   router.push('/login');
 };

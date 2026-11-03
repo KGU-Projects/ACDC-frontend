@@ -10,10 +10,26 @@ const sessions = ref([]);
 const loading = ref(true);
 const starting = ref(false);
 const errorMessage = ref('');
+const loadFailed = ref(false);
 
 let pollTimer = null;
 let consumers = 0; // 마운트된 useSessions 사용처 수. 0이면 "언마운트됨"으로 보고 타이머를 만들지 않는다.
 let inflight = null;
+let epoch = 0; // 상태를 비울 때마다 올린다. 이전 epoch에서 시작한 응답은 버린다.
+let loadedFor; // 현재 상태를 불러온 사용자 id
+
+// 로그아웃·계정 전환·마지막 사용처 언마운트 시 호출. 진행 중이던 요청 결과는 버려진다.
+export const resetSessions = () => {
+  epoch += 1;
+  stopPolling();
+  inflight = null;
+  loadedFor = undefined;
+  sessions.value = [];
+  scenarios.value = [];
+  errorMessage.value = '';
+  loadFailed.value = false;
+  loading.value = true;
+};
 
 const stopPolling = () => {
   if (pollTimer) {
@@ -30,32 +46,46 @@ const syncPolling = () => {
 };
 
 async function refreshSessions() {
+  const mine = epoch;
   try {
-    sessions.value = (await listSessions()) || [];
+    const list = (await listSessions()) || [];
+    if (mine !== epoch) return;
+    sessions.value = list;
   } catch {
     // 다음 주기에 다시 시도한다.
   }
-  syncPolling();
+  if (mine === epoch) syncPolling();
 }
 
 // 시나리오와 세션을 함께 조회한다. 진행 중인 조회가 있으면 그 결과를 같이 쓴다.
+// 다른 계정의 상태가 남아 있으면 먼저 비우고, 비운 뒤 도착한 이전 응답은 버린다.
 const refresh = () => {
+  const uid = getStoredUser()?.id;
+  if (loadedFor !== undefined && loadedFor !== uid) resetSessions();
   if (inflight) return inflight;
-  inflight = (async () => {
+  const mine = epoch;
+  loadedFor = uid;
+  const run = (async () => {
     errorMessage.value = '';
+    if (loadFailed.value) loading.value = true; // 다시 시도 중에는 빈 상태가 아니라 자리표시를 보인다.
+    loadFailed.value = false;
     try {
       const [scenarioList, sessionList] = await Promise.all([listScenarios(), listSessions()]);
+      if (mine !== epoch) return;
       scenarios.value = scenarioList || [];
       sessions.value = sessionList || [];
     } catch (error) {
+      if (mine !== epoch) return;
       errorMessage.value = error.message || '목록을 불러오지 못했습니다.';
-    } finally {
-      loading.value = false;
-      inflight = null;
-      syncPolling();
+      loadFailed.value = true;
     }
-  })();
-  return inflight;
+    loading.value = false;
+    syncPolling();
+  })().finally(() => {
+    if (inflight === run) inflight = null;
+  });
+  inflight = run;
+  return run;
 };
 
 const counts = computed(() => {
@@ -98,14 +128,8 @@ export function useSessions() {
   });
   onBeforeUnmount(() => {
     consumers -= 1;
-    if (consumers === 0) {
-      stopPolling();
-      // 로그아웃 후 다른 계정이 들어와도 이전 목록이 비치지 않게 비운다.
-      sessions.value = [];
-      scenarios.value = [];
-      loading.value = true;
-    }
+    if (consumers === 0) resetSessions();
   });
 
-  return { sessions, scenarios, loading, starting, errorMessage, counts, refresh, start, openSession };
+  return { sessions, scenarios, loading, starting, errorMessage, loadFailed, counts, refresh, start, openSession };
 }
