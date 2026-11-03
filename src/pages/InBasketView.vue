@@ -1,75 +1,83 @@
 <template>
-  <div class="bg-slate-50 min-h-screen p-3 sm:p-4">
-    <div v-if="loadError" class="max-w-xl mx-auto mt-20 text-center">
-      <p class="text-rose-500 font-bold mb-4">{{ loadError }}</p>
-      <button @click="router.push('/home')" class="text-sm font-bold text-brand">홈으로</button>
+  <div class="flex min-h-screen flex-col bg-ground lg:h-screen">
+    <div v-if="loadError" class="mx-auto mt-24 max-w-xl px-4 text-center">
+      <p class="mb-4 text-[14px] text-negative" role="alert">{{ loadError }}</p>
+      <button @click="router.push('/home')" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground md:h-10">홈으로</button>
     </div>
 
-    <div v-else-if="session" class="max-w-7xl mx-auto flex flex-col h-[calc(100vh-1.5rem)] sm:h-[calc(100vh-2rem)]">
-      <header class="bg-white rounded-2xl shadow px-5 py-3 flex items-center justify-between mb-3">
-        <div>
-          <h1 class="text-base font-extrabold text-slate-800">{{ session.scenarioTitle }}</h1>
-          <p class="text-[11px] text-slate-400">서류함 · {{ saveState }}</p>
+    <template v-else-if="session">
+      <header class="sticky top-0 z-30 flex min-h-12 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-surface px-4 py-1.5 lg:static">
+        <BrandMark class="hidden shrink-0 sm:inline-flex" />
+        <div class="min-w-0 flex-1 basis-40">
+          <h1 class="truncate text-[14px] font-medium leading-5 text-ink">{{ session.scenarioTitle }}</h1>
+          <p class="truncate text-[12px] leading-4 text-muted" aria-live="polite">서류함<span v-if="saveState"> · {{ saveState }}</span></p>
         </div>
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-lg font-bold" :class="remaining <= 300 ? 'text-rose-500' : 'text-slate-700'">{{ label }}</span>
-          <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="text-sm font-bold text-slate-500 hover:text-slate-700 disabled:text-slate-300 px-3 py-2">
+        <div class="flex shrink-0 items-center gap-2">
+          <span class="mr-1 text-[16px] font-semibold tabular-nums" :class="remaining <= 300 ? 'text-negative' : 'text-ink'" role="timer" aria-label="남은 시간">{{ label }}</span>
+          <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="h-11 rounded-control border border-control bg-surface px-3 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-9">
             {{ leaving ? '저장 중...' : '임시 저장 후 나가기' }}
           </button>
-          <button @click="submit" :disabled="submitting || leaving" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+          <button @click="submit" :disabled="submitting || leaving" class="h-11 rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 md:h-9">
             {{ submitting ? '제출 중...' : '제출' }}
           </button>
         </div>
       </header>
 
-      <p v-if="errorMessage" class="mb-2 text-xs font-bold text-rose-500">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="border-b border-line bg-surface px-4 py-2 text-[13px] text-negative" role="alert">{{ errorMessage }}</p>
 
-      <div class="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
-        <section class="bg-white rounded-2xl shadow flex flex-col min-h-0">
-          <div class="flex border-b border-slate-100 text-sm font-bold">
-            <button v-for="t in tabs" :key="t.key" @click="tab = t.key" class="px-4 py-3 transition-colors" :class="tab === t.key ? 'text-brand border-b-2 border-brand' : 'text-slate-400'">{{ t.label }}</button>
+      <div class="grid flex-1 grid-cols-1 gap-4 p-4 lg:min-h-0 lg:grid-cols-2">
+        <section class="flex min-h-[60vh] flex-col rounded-card border border-line bg-surface lg:min-h-0" aria-label="평가 자료">
+          <div class="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-2">
+            <button
+              v-for="t in tabs"
+              :key="t.key"
+              @click="tab = t.key"
+              :aria-current="tab === t.key ? 'true' : undefined"
+              class="-mb-px h-11 shrink-0 whitespace-nowrap border-b-2 px-3 text-[14px] md:h-10"
+              :class="tab === t.key ? 'border-ink font-medium text-ink' : 'border-transparent text-muted hover:text-ink'"
+            >{{ t.label }}</button>
           </div>
 
-          <div class="p-5 overflow-y-auto text-sm text-slate-700 leading-relaxed">
-            <div v-if="tab === 'guide'" class="space-y-4">
-              <div v-if="scenario.situation"><h3 class="font-bold text-slate-800 mb-1">상황</h3><p class="whitespace-pre-wrap">{{ scenario.situation }}</p></div>
-              <div v-if="scenario.participantRole"><h3 class="font-bold text-slate-800 mb-1">나의 역할</h3><p class="whitespace-pre-wrap">{{ scenario.participantRole }}</p></div>
+          <div class="min-h-0 flex-1 overflow-y-auto p-5 text-[14px] leading-6 text-ink">
+            <div v-if="tab === 'guide'" class="space-y-5">
+              <div v-if="scenario.situation"><h3 class="mb-1 text-[14px] font-semibold text-ink">상황</h3><p class="whitespace-pre-wrap">{{ scenario.situation }}</p></div>
+              <div v-if="scenario.participantRole"><h3 class="mb-1 text-[14px] font-semibold text-ink">나의 역할</h3><p class="whitespace-pre-wrap">{{ scenario.participantRole }}</p></div>
               <div v-if="scenario.reportRequirements?.length">
-                <h3 class="font-bold text-slate-800 mb-1">작성 요건</h3>
-                <ul class="list-disc pl-5 space-y-1"><li v-for="(r, i) in scenario.reportRequirements" :key="i">{{ r }}</li></ul>
+                <h3 class="mb-1 text-[14px] font-semibold text-ink">작성 요건</h3>
+                <ul class="list-disc space-y-1 pl-5"><li v-for="(r, i) in scenario.reportRequirements" :key="i">{{ r }}</li></ul>
               </div>
             </div>
 
-            <div v-else-if="tab === 'items'" class="space-y-3">
-              <div v-for="item in scenario.items" :key="item.id" class="rounded-xl border border-slate-100 p-4">
-                <h3 class="font-bold text-slate-800">안건 {{ item.id }}. {{ item.title }}</h3>
+            <div v-else-if="tab === 'items'" class="divide-y divide-rule">
+              <div v-for="item in scenario.items" :key="item.id" class="py-4 first:pt-0 last:pb-0">
+                <h3 class="text-[14px] font-semibold text-ink">안건 {{ item.id }}. {{ item.title }}</h3>
                 <p class="mt-1 whitespace-pre-wrap">{{ item.body }}</p>
-                <p v-if="item.deadline" class="mt-2 text-xs font-bold text-amber-600">기한: {{ item.deadline }}</p>
+                <p v-if="item.deadline" class="mt-2 text-[12px] text-muted">기한: {{ item.deadline }}</p>
               </div>
             </div>
 
             <div v-else-if="tab === 'pdf'" class="h-[70vh]">
-              <iframe :src="scenario.materialsPdf" title="과제 원본 PDF" class="w-full h-full rounded-xl border border-slate-200"></iframe>
-              <a :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block mt-2 text-xs font-bold text-brand">새 탭에서 열기</a>
+              <iframe :src="scenario.materialsPdf" title="과제 원본 PDF" class="h-full w-full rounded-control border border-line"></iframe>
+              <a :href="scenario.materialsPdf" target="_blank" rel="noopener" class="mt-2 inline-block text-[13px] text-ink underline underline-offset-2">새 탭에서 열기</a>
             </div>
 
-            <div v-else class="space-y-4">
-              <div v-for="m in scenario.materials" :key="m.id" class="rounded-xl border border-slate-100 p-4">
-                <h3 class="font-bold text-slate-800 mb-2">{{ m.title }}</h3>
+            <div v-else class="divide-y divide-rule">
+              <div v-for="m in scenario.materials" :key="m.id" class="py-4 first:pt-0 last:pb-0">
+                <h3 class="mb-1 text-[14px] font-semibold text-ink">{{ m.title }}</h3>
                 <p class="whitespace-pre-wrap">{{ m.body }}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="bg-white rounded-2xl shadow flex flex-col min-h-0 p-4">
-          <label for="answer" class="text-sm font-bold text-slate-800 mb-2">답안</label>
-          <textarea id="answer" v-model="answer" @input="scheduleSave" :disabled="submitting || leaving" class="flex-grow w-full resize-none rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 p-4 text-sm leading-relaxed" :placeholder="scenario.answerTemplate || '답안을 작성하세요.'"></textarea>
+        <section class="flex min-h-[60vh] flex-col rounded-card border border-line bg-surface p-4 lg:min-h-0">
+          <label for="answer" class="mb-2 text-[14px] font-semibold text-ink">답안</label>
+          <textarea id="answer" v-model="answer" @input="scheduleSave" :disabled="submitting || leaving" class="w-full flex-1 resize-none rounded-control border border-control bg-surface p-3 text-[14px] leading-6 text-ink placeholder:text-faint disabled:bg-ground" :placeholder="scenario.answerTemplate || '답안을 작성하세요.'"></textarea>
         </section>
       </div>
-    </div>
+    </template>
 
-    <p v-else class="text-center text-slate-400 text-sm mt-20">불러오는 중...</p>
+    <p v-else class="mt-24 text-center text-[14px] text-muted">불러오는 중...</p>
   </div>
 </template>
 
@@ -78,6 +86,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getSession, pauseSession, resumeSession, saveAnswer, submitSession } from '../api/acdc';
 import { useCountdown } from '../composables/useCountdown';
+import BrandMark from '../components/ui/BrandMark.vue';
 
 const route = useRoute();
 const router = useRouter();
