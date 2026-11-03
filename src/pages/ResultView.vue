@@ -4,7 +4,7 @@
       <header class="bg-white rounded-2xl shadow px-5 py-4 flex items-center justify-between mb-4">
         <div>
           <h1 class="text-base font-extrabold text-slate-800">{{ session?.scenarioTitle || '결과' }}</h1>
-          <p v-if="session" class="text-[11px] text-slate-400">{{ session.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ statusLabel }}</p>
+          <p v-if="session" class="text-[11px] text-slate-400">{{ session.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ stageLabel }}</p>
         </div>
         <button @click="router.push('/home')" class="text-sm font-bold text-brand">홈으로</button>
       </header>
@@ -13,8 +13,13 @@
       <p v-else-if="!session" class="text-center text-slate-400 text-sm mt-10">불러오는 중...</p>
 
       <template v-else>
-        <div v-if="!session.evaluations?.length" class="bg-white rounded-2xl shadow p-8 text-center text-sm text-slate-500">
-          아직 채점 결과가 없습니다. 상태: {{ statusLabel }}
+        <div v-if="session.stage !== 'RESULT_READY'" class="bg-white rounded-2xl shadow p-8 text-center">
+          <p class="text-base font-bold text-slate-800">{{ stageLabel }}</p>
+          <p class="mt-2 text-sm text-slate-500">{{ stageMessage }}</p>
+        </div>
+
+        <div v-else-if="!session.evaluations?.length" class="bg-white rounded-2xl shadow p-8 text-center text-sm text-slate-500">
+          아직 채점 결과가 없습니다. 상태: {{ stageLabel }}
         </div>
 
         <div v-else class="space-y-4">
@@ -69,6 +74,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getSession } from '../api/acdc';
+import { STAGE_LABELS } from '../composables/stage';
 
 const route = useRoute();
 const router = useRouter();
@@ -76,14 +82,13 @@ const router = useRouter();
 const session = ref(null);
 const errorMessage = ref('');
 
-const STATUS_LABELS = {
-  READY: '준비',
-  IN_PROGRESS: '진행 중',
-  SUBMITTED: '채점 중',
-  SCORED: 'AI 채점 완료',
-  CONFIRMED: 'FT 확정'
+const STAGE_MESSAGES = {
+  RESULT_PENDING: '결과는 공개 시각에 확인할 수 있습니다',
+  FAILED: '채점에 실패했습니다. 담당 FT에게 문의해 주세요',
+  ABORTED: '제한 시간 안에 제출되지 않아 중단되었습니다'
 };
-const statusLabel = computed(() => STATUS_LABELS[session.value?.status] || session.value?.status || '');
+const stageLabel = computed(() => STAGE_LABELS[session.value?.stage] || session.value?.stage || '');
+const stageMessage = computed(() => STAGE_MESSAGES[session.value?.stage] || '채점이 진행 중입니다. 잠시 후 다시 확인해 주세요.');
 
 onMounted(async () => {
   try {

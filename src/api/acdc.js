@@ -20,6 +20,3 @@ export const confirmEvaluations = (id, items) => apiPut(`/api/sessions/${id}/eva
 export const requeueSession = (id) => apiPost(`/api/sessions/${id}/requeue`)
 export const setResultRelease = (scenarioId, releaseAt) =>
   apiPut(`/api/scenarios/${scenarioId}/result-release`, { releaseAt })
-
-// TODO(Task 7): InBasketView/RolePlayView 이전 후 제거. 새 코드는 composables/stage.js를 쓴다.
-export const FINISHED_STATUSES = ['SUBMITTED', 'SCORED', 'CONFIRMED']

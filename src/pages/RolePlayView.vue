@@ -116,8 +116,8 @@ import { EMOTION_LABELS, useFaceEmotion } from '../composables/useFaceEmotion';
 import { useAudioFeatures } from '../composables/useAudioFeatures';
 import { useMediaCapture } from '../composables/useMediaCapture';
 import { useRoute, useRouter } from 'vue-router';
-import { FINISHED_STATUSES, getSession, sendTurn, submitSession } from '../api/acdc';
-import { remainingSeconds, useCountdown } from '../composables/useCountdown';
+import { getSession, sendTurn, submitSession } from '../api/acdc';
+import { useCountdown } from '../composables/useCountdown';
 
 const route = useRoute();
 const router = useRouter();
@@ -171,7 +171,7 @@ const startCall = async () => {
   if (!mediaStream.value) return;
   phase.value = 'call';
   await bindStream(selfVideoRef);
-  startCountdown(remainingSeconds(session.value), submit);
+  startCountdown(session.value.remainingSeconds, submit);
   audio.start(mediaStream.value);
   const video = selfVideoRef.value;
   if (video && video.readyState < 2) {
@@ -266,7 +266,7 @@ const submit = async () => {
     await audio.flush();
     await submitSession(sessionId);
     stopCapture();
-    router.replace(`/result/${sessionId}`);
+    router.replace('/submitted');
   } catch (error) {
     errorMessage.value = error.message || '제출에 실패했습니다.';
     submitting.value = false;
@@ -284,8 +284,8 @@ watch(
 onMounted(async () => {
   try {
     const data = await getSession(sessionId);
-    if (FINISHED_STATUSES.includes(data.status)) {
-      router.replace(`/result/${sessionId}`);
+    if (data.stage !== 'IN_PROGRESS') {
+      router.replace('/home');
       return;
     }
     session.value = data;

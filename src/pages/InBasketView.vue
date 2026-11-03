@@ -13,7 +13,10 @@
         </div>
         <div class="flex items-center gap-3">
           <span class="font-mono text-lg font-bold" :class="remaining <= 300 ? 'text-rose-500' : 'text-slate-700'">{{ label }}</span>
-          <button @click="submit" :disabled="submitting" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+          <button v-if="session.mode === 'PRACTICE'" @click="saveAndLeave" :disabled="submitting || leaving" class="text-sm font-bold text-slate-500 hover:text-slate-700 disabled:text-slate-300 px-3 py-2">
+            {{ leaving ? '저장 중...' : '임시 저장 후 나가기' }}
+          </button>
+          <button @click="submit" :disabled="submitting || leaving" class="bg-brand hover:bg-brandHover disabled:bg-slate-300 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
             {{ submitting ? '채점 중...' : '제출' }}
           </button>
         </div>
@@ -61,7 +64,7 @@
 
         <section class="bg-white rounded-2xl shadow flex flex-col min-h-0 p-4">
           <label for="answer" class="text-sm font-bold text-slate-800 mb-2">답안</label>
-          <textarea id="answer" v-model="answer" @input="scheduleSave" :disabled="submitting" class="flex-grow w-full resize-none rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 p-4 text-sm leading-relaxed" :placeholder="scenario.answerTemplate || '답안을 작성하세요.'"></textarea>
+          <textarea id="answer" v-model="answer" @input="scheduleSave" :disabled="submitting || leaving" class="flex-grow w-full resize-none rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 p-4 text-sm leading-relaxed" :placeholder="scenario.answerTemplate || '답안을 작성하세요.'"></textarea>
         </section>
       </div>
     </div>
@@ -73,8 +76,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { FINISHED_STATUSES, getSession, saveAnswer, submitSession } from '../api/acdc';
-import { remainingSeconds, useCountdown } from '../composables/useCountdown';
+import { getSession, pauseSession, resumeSession, saveAnswer, submitSession } from '../api/acdc';
+import { useCountdown } from '../composables/useCountdown';
 
 const route = useRoute();
 const router = useRouter();
@@ -87,6 +90,7 @@ const loadError = ref('');
 const errorMessage = ref('');
 const submitting = ref(false);
 const saveState = ref('');
+const leaving = ref(false);
 const { remaining, label, start: startCountdown, stop: stopCountdown } = useCountdown();
 
 const scenario = computed(() => session.value?.scenario || {});
@@ -99,20 +103,42 @@ const tabs = computed(() => [
 
 let saveTimer = null;
 let lastSaved = '';
+let paused = false; // 일시정지 이후에는 서버가 입력을 거부하므로 저장 요청을 보내지 않는다.
 
 const flushSave = async () => {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = null;
   const text = answer.value;
-  if (!text.trim() || text === lastSaved) return;
+  if (paused || !text.trim() || text === lastSaved) return true;
   saveState.value = '저장 중...';
   try {
     await saveAnswer(sessionId, text);
     lastSaved = text;
     saveState.value = '자동 저장됨';
+    return true;
   } catch (error) {
     saveState.value = '저장 실패';
     errorMessage.value = error.message || '답안을 저장하지 못했습니다.';
+    return false;
+  }
+};
+
+const saveAndLeave = async () => {
+  if (leaving.value || submitting.value) return;
+  leaving.value = true;
+  errorMessage.value = '';
+  try {
+    if (!(await flushSave())) {
+      leaving.value = false;
+      return;
+    }
+    stopCountdown();
+    await pauseSession(sessionId);
+    paused = true;
+    router.push('/home');
+  } catch (error) {
+    errorMessage.value = error.message || '임시 저장에 실패했습니다.';
+    leaving.value = false;
   }
 };
 
@@ -134,7 +160,7 @@ const submit = async () => {
   try {
     await flushSave();
     await submitSession(sessionId);
-    router.replace(`/result/${sessionId}`);
+    router.replace('/submitted');
   } catch (error) {
     errorMessage.value = error.message || '제출에 실패했습니다.';
     submitting.value = false;
@@ -144,20 +170,22 @@ const submit = async () => {
 onMounted(async () => {
   try {
     const data = await getSession(sessionId);
-    if (FINISHED_STATUSES.includes(data.status)) {
-      router.replace(`/result/${sessionId}`);
+    if (data.stage !== 'IN_PROGRESS') {
+      router.replace('/home');
       return;
     }
+    // 연습 세션은 나갈 때 일시정지되므로 진입 즉시 재개하고, 응답의 남은 시간으로 시작한다(서버가 정지 중이 아니면 no-op).
+    const live = data.mode === 'PRACTICE' ? await resumeSession(sessionId) : data;
     session.value = data;
     answer.value = data.answer || '';
     lastSaved = answer.value;
-    startCountdown(remainingSeconds(data), submit);
+    startCountdown(live.remainingSeconds ?? data.remainingSeconds, submit);
   } catch (error) {
     loadError.value = error.message || '세션을 불러오지 못했습니다.';
   }
 });
 
 onBeforeUnmount(() => {
-  if (saveTimer) flushSave();
+  if (saveTimer && !paused && !leaving.value) flushSave();
 });
 </script>
