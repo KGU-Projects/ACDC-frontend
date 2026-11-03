@@ -50,11 +50,10 @@ import AppIcon from '../components/ui/AppIcon.vue';
 import BrandMark from '../components/ui/BrandMark.vue';
 import SideNavContent from './SideNavContent.vue';
 import { getStoredUser, logout } from '../api/auth';
+import { useSessions } from '../composables/useSessions';
 
-// inProgressCount: 진행 중인 세션 수. 0이면 배지를 그리지 않는다(채우는 쪽은 Task 2).
-const props = defineProps({
-  inProgressCount: { type: Number, default: 0 }
-});
+// 세션 목록은 화면과 공유하는 싱글턴이라 폴링이 한 번만 돈다.
+const { counts } = useSessions();
 
 const route = useRoute();
 const router = useRouter();
@@ -78,7 +77,7 @@ const isActive = (item) => {
   return p === item.to || p.startsWith(`${item.to}/`);
 };
 
-const badgeFor = (item) => (item.badge && props.inProgressCount > 0 ? props.inProgressCount : 0);
+const badgeFor = (item) => (item.badge && counts.value.inProgress > 0 ? counts.value.inProgress : 0);
 
 const handleLogout = async () => {
   await logout();
