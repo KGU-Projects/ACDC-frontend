@@ -1,88 +1,85 @@
 <template>
-  <div class="bg-slate-50 min-h-screen p-3 sm:p-4">
-    <div class="max-w-3xl mx-auto space-y-4">
-      <header class="bg-white rounded-2xl shadow px-5 py-4 flex items-center justify-between">
-        <h1 class="text-base font-extrabold text-slate-800">FT 검토</h1>
-        <button @click="router.push('/home')" class="text-sm font-bold text-brand">홈으로</button>
-      </header>
+  <div class="max-w-3xl">
+    <PageHeader title="FT 검토" subtitle="결과 공개 시각을 설정하고, 채점된 응시 건을 검토해 최종 점수를 확정합니다." />
 
-      <section class="bg-white rounded-2xl shadow p-5">
-        <h2 class="text-sm font-bold text-slate-800 mb-1">결과 공개 시각</h2>
-        <p class="text-[11px] text-slate-400 mb-3">과제별 설정이며 실전 응시 결과에 적용됩니다. 이미 지난 공개 시각을 더 늦출 수는 없습니다.</p>
-        <p v-if="releaseMessage" class="mb-3 text-xs font-bold" :class="releaseError ? 'text-rose-500' : 'text-brand'">{{ releaseMessage }}</p>
-        <p v-if="!scenarios.length" class="text-xs text-slate-400">등록된 과제가 없습니다.</p>
-        <ul class="space-y-2">
-          <li v-for="s in scenarios" :key="s.id" class="bg-slate-50 rounded-xl px-4 py-3">
-            <span class="block text-sm font-bold text-slate-700">{{ s.title }}</span>
-            <span class="block text-[11px] text-slate-400">{{ s.type === 'IN_BASKET' ? '서류함' : '역할수행' }} · 현재 {{ s.resultReleaseAt ? formatDate(s.resultReleaseAt) : '미설정' }}</span>
-            <div class="mt-2 flex items-center gap-2">
-              <input type="datetime-local" v-model="releaseInputs[s.id]" class="flex-grow min-w-0 border border-slate-200 rounded-lg px-2 py-1.5 text-xs" />
-              <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="rounded-lg bg-brand text-white px-3 py-1.5 text-xs font-bold disabled:opacity-60">저장</button>
+    <div class="space-y-6">
+      <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="release-title">
+        <h2 id="release-title" class="text-[16px] font-semibold text-ink">결과 공개 시각</h2>
+        <p class="mb-3 mt-1 text-[13px] text-muted">과제별 설정이며 실전 응시 결과에 적용됩니다. 이미 지난 공개 시각을 더 늦출 수는 없습니다.</p>
+        <p v-if="releaseMessage" class="mb-3 text-[13px]" :class="releaseError ? 'text-negative' : 'text-positive'" role="status">{{ releaseMessage }}</p>
+        <p v-if="!scenarios.length" class="text-[13px] text-muted">등록된 과제가 없습니다.</p>
+        <ul class="divide-y divide-rule border-t border-rule">
+          <li v-for="s in scenarios" :key="s.id" class="py-3">
+            <span class="block text-[14px] font-medium text-ink">{{ s.title }}</span>
+            <span class="block text-[12px] text-muted">{{ s.type === 'IN_BASKET' ? '서류함' : '역할수행' }} · 현재 {{ s.resultReleaseAt ? formatDate(s.resultReleaseAt) : '미설정' }}</span>
+            <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div class="min-w-0 sm:w-60"><input type="datetime-local" v-model="releaseInputs[s.id]" :aria-label="`${s.title} 공개 시각`" class="field-input" /></div>
+              <button @click="saveRelease(s)" :disabled="!releaseInputs[s.id] || savingId === s.id" class="h-11 rounded-control border border-control bg-surface px-4 text-[14px] font-medium text-ink hover:bg-ground disabled:opacity-50 md:h-10">저장</button>
             </div>
           </li>
         </ul>
       </section>
 
-      <section class="bg-white rounded-2xl shadow p-5">
-        <h2 class="text-sm font-bold text-slate-800 mb-3">검토 목록</h2>
-        <p v-if="listError" class="mb-3 text-xs font-bold text-rose-500">{{ listError }}</p>
-        <p v-if="!reviews.length" class="text-xs text-slate-400">검토 대상 세션이 없습니다.</p>
-        <ul class="space-y-2">
-          <li v-for="r in reviews" :key="r.id" class="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between gap-2" :class="r.id === selectedId ? 'ring-2 ring-brand' : ''">
-            <button @click="select(r)" class="text-left flex-grow min-w-0">
-              <span class="block text-sm font-bold text-slate-700">{{ r.scenarioTitle }}</span>
-              <span class="block text-[11px] text-slate-400">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
+      <section class="rounded-card border border-line bg-surface p-5" aria-labelledby="review-title">
+        <h2 id="review-title" class="mb-3 text-[16px] font-semibold text-ink">검토 목록</h2>
+        <p v-if="listError" class="mb-3 text-[13px] text-negative" role="alert">{{ listError }}</p>
+        <p v-if="!reviews.length" class="text-[13px] text-muted">검토 대상 세션이 없습니다.</p>
+        <ul class="divide-y divide-rule border-t border-rule">
+          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-l-2 py-2 pl-3" :class="r.id === selectedId ? 'border-ink bg-ground' : 'border-transparent'">
+            <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left">
+              <span class="block truncate text-[14px] font-medium text-ink">{{ r.scenarioTitle }}</span>
+              <span class="block truncate text-[12px] text-muted">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
             </button>
-            <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="text-[11px] font-bold px-2 py-1 rounded-lg border border-rose-300 text-rose-500 disabled:opacity-60">재채점 요청</button>
-            <span class="text-[11px] font-bold px-2 py-1 rounded-full whitespace-nowrap" :class="badgeClass(r.stage)">{{ STAGE_LABELS[r.stage] || r.stage }}</span>
+            <button v-if="r.stage === 'FAILED'" @click="requeue(r)" :disabled="requeueingId === r.id" class="h-11 rounded-control border border-control bg-surface px-3 text-[13px] font-medium text-negative hover:bg-ground disabled:opacity-50 md:h-8">재채점 요청</button>
+            <StatusPill :tone="toneOf(r.stage)" :label="STAGE_LABELS[r.stage] || r.stage" />
           </li>
         </ul>
       </section>
 
-      <section v-if="selectedId" class="space-y-4">
-        <p v-if="detailError" class="text-center text-rose-500 font-bold text-sm">{{ detailError }}</p>
-        <p v-else-if="!detail" class="text-center text-slate-400 text-sm">불러오는 중...</p>
+      <section v-if="selectedId" class="space-y-4" aria-label="검토 상세">
+        <p v-if="detailError" class="text-center text-[14px] text-negative" role="alert">{{ detailError }}</p>
+        <p v-else-if="!detail" class="text-center text-[14px] text-muted">불러오는 중...</p>
         <template v-else>
-          <div class="bg-white rounded-2xl shadow p-5">
-            <h2 class="text-sm font-bold text-slate-800 mb-3">{{ detail.scenarioType === 'IN_BASKET' ? '제출 답안' : '대화 기록' }}</h2>
+          <div class="rounded-card border border-line bg-surface p-5">
+            <h2 class="mb-3 text-[16px] font-semibold text-ink">{{ detail.scenarioType === 'IN_BASKET' ? '제출 답안' : '대화 기록' }}</h2>
             <ul v-if="detail.scenarioType === 'ROLE_PLAY'" class="space-y-2">
-              <li v-for="t in detail.turns || []" :key="t.seq" class="text-sm whitespace-pre-wrap">
-                <span class="font-bold" :class="t.speaker === 'USER' ? 'text-brand' : 'text-slate-500'">{{ t.speaker === 'USER' ? '참가자' : '상대역' }}</span>
-                <span class="text-slate-700"> {{ t.text }}</span>
+              <li v-for="t in detail.turns || []" :key="t.seq" class="whitespace-pre-wrap text-[14px] leading-6">
+                <span class="font-semibold" :class="t.speaker === 'USER' ? 'text-ink' : 'text-muted'">{{ t.speaker === 'USER' ? '참가자' : '상대역' }}</span>
+                <span class="text-ink"> {{ t.text }}</span>
               </li>
             </ul>
-            <p v-else class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{{ detail.answer }}</p>
+            <p v-else class="whitespace-pre-wrap text-[14px] leading-6 text-ink">{{ detail.answer }}</p>
           </div>
 
-          <p v-if="!editable" class="text-xs text-slate-400 text-center">읽기 전용입니다{{ detail.status === 'SCORED' ? '' : ' (검토 가능한 단계가 아님)' }}.</p>
+          <p v-if="!editable" class="text-[13px] text-muted">읽기 전용입니다{{ detail.status === 'SCORED' ? '' : ' (검토 가능한 단계가 아님)' }}.</p>
 
-          <article v-for="e in detail.evaluations || []" :key="e.competency" class="bg-white rounded-2xl shadow p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-base font-bold text-slate-800">{{ e.competency }}</h3>
-              <span class="text-xs text-slate-500">AI 점수 <b class="text-brand text-base">{{ e.aiScore }}</b> / 5</span>
+          <article v-for="e in detail.evaluations || []" :key="e.competency" class="rounded-card border border-line bg-surface p-5">
+            <div class="mb-3 flex items-baseline justify-between gap-3">
+              <h3 class="text-[16px] font-semibold text-ink">{{ e.competency }}</h3>
+              <span class="text-[13px] text-muted">AI 점수 <b class="text-[16px] font-semibold tabular-nums text-ink">{{ e.aiScore }}</b> / 5</span>
             </div>
-            <ul v-if="e.aiEvidence?.length" class="space-y-1 mb-3">
-              <li v-for="(ev, i) in e.aiEvidence" :key="i" class="text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-2 whitespace-pre-wrap">“{{ ev }}”</li>
+            <ul v-if="e.aiEvidence?.length" class="mb-3 space-y-1">
+              <li v-for="(ev, i) in e.aiEvidence" :key="i" class="whitespace-pre-wrap border-l-2 border-line pl-3 text-[14px] leading-6 text-muted">“{{ ev }}”</li>
             </ul>
-            <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{{ e.aiFeedback }}</p>
+            <p class="whitespace-pre-wrap text-[14px] leading-6 text-ink">{{ e.aiFeedback }}</p>
 
-            <div class="mt-3 border-t border-slate-100 pt-3">
+            <div class="mt-3 border-t border-rule pt-3">
               <template v-if="editable && forms[e.competency]">
-                <label class="block text-xs font-bold text-slate-500 mb-1">최종 점수 (1~5 정수)</label>
-                <input type="number" min="1" max="5" step="1" :placeholder="`AI ${e.aiScore}점`" v-model.number="forms[e.competency].finalScore" class="w-24 border border-slate-200 rounded-lg px-2 py-1.5 text-sm" />
-                <label class="block text-xs font-bold text-slate-500 mt-3 mb-1">FT 코멘트</label>
-                <textarea v-model="forms[e.competency].ftComment" rows="2" class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm"></textarea>
+                <label :for="`score-${e.competency}`" class="mb-1 block text-[13px] font-medium text-ink">최종 점수 (1~5 정수)</label>
+                <div class="w-28"><input :id="`score-${e.competency}`" type="number" min="1" max="5" step="1" :placeholder="`AI ${e.aiScore}점`" v-model.number="forms[e.competency].finalScore" class="field-input tabular-nums" /></div>
+                <label :for="`comment-${e.competency}`" class="mb-1 mt-3 block text-[13px] font-medium text-ink">FT 코멘트</label>
+                <textarea :id="`comment-${e.competency}`" v-model="forms[e.competency].ftComment" rows="3" class="w-full resize-y rounded-control border border-control bg-surface p-3 text-[14px] leading-6 text-ink focus-visible:border-accent"></textarea>
               </template>
               <template v-else>
-                <p class="text-sm text-slate-700">최종 점수: <b>{{ e.finalScore ?? '-' }}</b></p>
-                <p v-if="e.ftComment" class="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{{ e.ftComment }}</p>
+                <p class="text-[14px] text-ink">최종 점수: <b class="tabular-nums">{{ e.finalScore ?? '-' }}</b></p>
+                <p v-if="e.ftComment" class="mt-1 whitespace-pre-wrap text-[14px] leading-6 text-ink">{{ e.ftComment }}</p>
               </template>
             </div>
           </article>
 
-          <div v-if="editable" class="bg-white rounded-2xl shadow p-5">
-            <p v-if="confirmError" class="mb-3 text-xs font-bold text-rose-500">{{ confirmError }}</p>
-            <button @click="confirm" :disabled="confirming" class="w-full rounded-xl bg-brand text-white py-3 text-sm font-bold disabled:opacity-60">확정</button>
+          <div v-if="editable" class="rounded-card border border-line bg-surface p-5">
+            <p v-if="confirmError" class="mb-3 text-[13px] text-negative" role="alert">{{ confirmError }}</p>
+            <button @click="confirm" :disabled="confirming" class="h-11 w-full rounded-control bg-primary px-6 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 sm:w-auto md:h-10">확정</button>
           </div>
         </template>
       </section>
@@ -103,6 +100,8 @@ import {
 } from '../api/acdc';
 import { getStoredUser } from '../api/auth';
 import { STAGE_LABELS } from '../composables/stage';
+import PageHeader from '../components/ui/PageHeader.vue';
+import StatusPill from '../components/ui/StatusPill.vue';
 
 const router = useRouter();
 
@@ -126,11 +125,11 @@ const confirmError = ref('');
 const editable = computed(() => detail.value?.status === 'SCORED');
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString('ko-KR') : '');
-const badgeClass = (stage) => {
-  if (stage === 'FT_REVIEW') return 'bg-amber-100 text-amber-600';
-  if (stage === 'FAILED' || stage === 'ABORTED') return 'bg-rose-100 text-rose-500';
-  if (stage === 'RESULT_READY' || stage === 'RESULT_PENDING') return 'bg-brandLight text-brand';
-  return 'bg-slate-200 text-slate-500';
+const toneOf = (stage) => {
+  if (stage === 'FT_REVIEW') return 'warning';
+  if (stage === 'FAILED' || stage === 'ABORTED') return 'negative';
+  if (stage === 'RESULT_READY' || stage === 'RESULT_PENDING') return 'accent';
+  return 'neutral';
 };
 
 // ISO 인스턴트 <-> datetime-local 값(브라우저 로컬 시각) 변환
