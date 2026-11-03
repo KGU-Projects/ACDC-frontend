@@ -18,7 +18,7 @@
           <h2 :id="titleId" class="text-[16px] font-semibold text-ink">{{ title }}</h2>
           <button
             type="button"
-            class="-mr-2 flex h-9 w-9 items-center justify-center rounded-control text-muted hover:bg-ground hover:text-ink"
+            class="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-control text-muted md:h-9 md:w-9 hover:bg-ground hover:text-ink"
             aria-label="닫기"
             @click="emit('close')"
           >

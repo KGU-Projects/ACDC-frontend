@@ -79,14 +79,13 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { getSession } from '../api/acdc';
 import { STAGE_LABELS, formatDate, modeLabel, typeLabel } from '../composables/stage';
 import PageHeader from '../components/ui/PageHeader.vue';
 import StatusPill from '../components/ui/StatusPill.vue';
 
 const route = useRoute();
-const router = useRouter();
 
 const session = ref(null);
 const errorMessage = ref('');

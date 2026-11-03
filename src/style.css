@@ -123,3 +123,9 @@
 /* 키보드 포커스는 어디서나 보이게 */
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .field-input:focus-visible { outline-offset: 0; border-color: var(--accent); }
+
+/* 움직임 줄이기: 아바타 반복 애니메이션과 전환을 끈다(상태 표시는 정적으로 유지) */
+@media (prefers-reduced-motion: reduce) {
+  .eye-blink, .mouth-talk, .dot { animation: none !important; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

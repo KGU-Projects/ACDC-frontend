@@ -17,7 +17,7 @@ import FaqView from './pages/FaqView.vue';
 import { getStoredUser } from './api/auth';
 
 // meta.layout: 'shell'(사이드바), 'focus'(상단 바만), 'bare'(기본, 래퍼 없음)
-// 서류함·역할수행·제출 완료는 아직 각 페이지가 자체 전체 화면 틀을 쓰므로 Task 4에서 'focus'로 바꾼다.
+// /inbasket·/roleplay는 각 페이지가 자체 상단 바(타이머·제출)를 그리므로 'bare'로 두고, /submitted는 'focus'를 쓴다.
 const routes = [
   { path: '/', redirect: '/login' },
 

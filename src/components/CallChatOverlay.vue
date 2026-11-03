@@ -1,5 +1,6 @@
 <template>
   <div ref="rootEl" class="flex h-full flex-col bg-stage/80 text-white" data-testid="call-chat-overlay">
+    <div class="h-14 shrink-0 lg:hidden" aria-hidden="true"></div>
     <div ref="logEl" class="min-h-0 flex-grow space-y-3 overflow-y-auto p-3">
       <div v-for="(m, i) in messages" :key="i" class="flex" :class="m.speaker === 'USER' ? 'justify-end' : 'justify-start'">
         <div class="max-w-[88%] whitespace-pre-wrap rounded-card px-3 py-2 text-[14px] leading-5" :class="m.speaker === 'USER' ? 'bg-stageInk text-ink' : 'border border-white/20 bg-white/10 text-white'">

@@ -25,8 +25,8 @@
         <p v-if="listError" class="mb-3 text-[13px] text-negative" role="alert">{{ listError }}</p>
         <p v-if="!reviews.length" class="text-[13px] text-muted">검토 대상 세션이 없습니다.</p>
         <ul class="divide-y divide-rule border-t border-rule">
-          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-l-2 py-2 pl-3" :class="r.id === selectedId ? 'border-ink bg-ground' : 'border-transparent'">
-            <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left">
+          <li v-for="r in reviews" :key="r.id" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-control px-3 py-2" :class="r.id === selectedId ? 'bg-line' : ''">
+            <button @click="select(r)" :aria-current="r.id === selectedId ? 'true' : undefined" class="min-h-11 min-w-0 flex-1 basis-48 text-left" :class="r.id === selectedId ? 'font-medium' : ''">
               <span class="block truncate text-[14px] font-medium text-ink">{{ r.scenarioTitle }}</span>
               <span class="block truncate text-[12px] text-muted">{{ r.participantName }} · {{ r.scenarioType === 'IN_BASKET' ? '서류함' : '역할수행' }} · {{ formatDate(r.endedAt) }}</span>
             </button>
@@ -99,7 +99,7 @@ import {
   setResultRelease
 } from '../api/acdc';
 import { getStoredUser } from '../api/auth';
-import { STAGE_LABELS } from '../composables/stage';
+import { STAGE_LABELS, formatDate } from '../composables/stage';
 import PageHeader from '../components/ui/PageHeader.vue';
 import StatusPill from '../components/ui/StatusPill.vue';
 
@@ -124,7 +124,6 @@ const confirmError = ref('');
 
 const editable = computed(() => detail.value?.status === 'SCORED');
 
-const formatDate = (value) => (value ? new Date(value).toLocaleString('ko-KR') : '');
 const toneOf = (stage) => {
   if (stage === 'FT_REVIEW') return 'warning';
   if (stage === 'FAILED' || stage === 'ABORTED') return 'negative';
