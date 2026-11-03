@@ -6,8 +6,8 @@
         <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand/10 to-transparent"></div>
 
         <div class="relative z-10">
-          <h1 class="text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">Career-View</h1>
-          <p class="text-brand font-semibold text-sm mb-6">지능형 모의 면접 스마트 거울</p>
+          <h1 class="text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">AC/DC</h1>
+          <p class="text-brand font-semibold text-sm mb-6">AC/DC 역량평가 시뮬레이터</p>
 
           <div class="relative w-28 h-28 mx-auto flex justify-center items-center">
             <div class="absolute inset-0 border-4 border-brand/30 rounded-2xl animate-[pulse_2s_ease-in-out_infinite]"></div>
@@ -24,7 +24,7 @@
       <div class="w-full p-6 sm:p-8">
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-slate-800 mb-1">환영합니다 👋</h2>
-          <p class="text-slate-500 text-sm">성공적인 면접을 위한 첫 걸음을 시작하세요.</p>
+          <p class="text-slate-500 text-sm">서류함·역할수행 과제를 시작하세요.</p>
         </div>
 
         <form @submit.prevent="handleLogin">

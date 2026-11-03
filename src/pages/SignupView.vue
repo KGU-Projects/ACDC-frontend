@@ -6,8 +6,8 @@
         <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand/10 to-transparent"></div>
 
         <div class="relative z-10 w-full flex flex-col items-center">
-          <h1 class="text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">Career-View</h1>
-          <p class="text-brand font-semibold text-sm mb-6">나만의 AI 면접 트레이너</p>
+          <h1 class="text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">AC/DC</h1>
+          <p class="text-brand font-semibold text-sm mb-6">AC/DC 역량평가 시뮬레이터</p>
 
           <div class="relative w-24 h-24 mx-auto flex justify-center items-center mb-5">
             <div class="absolute inset-0 border-4 border-brand/30 rounded-2xl animate-[pulse_2s_ease-in-out_infinite]"></div>
@@ -20,8 +20,8 @@
           </div>
 
           <div class="flex flex-col gap-1.5 text-[11px] sm:text-xs text-slate-600 font-medium">
-            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 실시간 표정 및 감정 분석</p>
-            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> AI 맞춤형 꼬리 질문 생성</p>
+            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 서류함·역할수행 과제 실습</p>
+            <p class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> AI 상대역 면담과 자동 채점·피드백</p>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
       <div class="w-full p-6 sm:p-8">
         <div class="mb-5">
           <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-1">계정 만들기 ✨</h2>
-          <p class="text-slate-500 text-xs">기본 정보를 입력하고 스마트한 면접 준비를 시작하세요.</p>
+          <p class="text-slate-500 text-xs">기본 정보를 입력하고 역량평가 연습을 시작하세요.</p>
         </div>
 
         <form @submit.prevent="handleSignup">
@@ -68,7 +68,7 @@
           </p>
 
           <button type="submit" :disabled="isSubmitting" class="w-full bg-brand hover:bg-brandHover disabled:bg-slate-300 disabled:shadow-none disabled:transform-none text-white font-bold py-3 rounded-xl shadow-lg shadow-brand/30 hover:shadow-brand/50 transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
-            {{ isSubmitting ? '가입 중...' : 'Career-View 시작하기' }}
+            {{ isSubmitting ? '가입 중...' : 'AC/DC 시작하기' }}
           </button>
         </form>
 
@@ -142,7 +142,7 @@ const handleSignup = async () => {
         }
 
         saveAuthSession(authData);
-        router.push('/job-select');
+        router.push('/home');
     } catch (error) {
         console.error('회원가입 에러:', error);
         errorMessage.value = error.message || '회원가입에 실패했습니다.';

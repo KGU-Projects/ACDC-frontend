@@ -1,47 +1,61 @@
 <template>
   <div class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
-    
-    <div class="bg-white shadow-2xl rounded-[2.5rem] flex flex-col max-w-sm sm:max-w-md w-full overflow-hidden h-[85vh] sm:h-[90vh] relative">
+    <div class="bg-white shadow-2xl rounded-[2.5rem] flex flex-col max-w-sm sm:max-w-2xl w-full overflow-hidden min-h-[85vh] relative">
 
-      <div class="w-full px-6 pt-8 pb-4 flex justify-between items-center relative z-10">
-        <div class="text-xl font-extrabold text-slate-800 tracking-tight">Career-View</div>
-        <button @click="goToMyPage" class="p-2.5 bg-slate-50 rounded-full hover:bg-brandLight hover:text-brand text-slate-400 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-          </svg>
-        </button>
+      <div class="w-full px-6 pt-8 pb-4 flex justify-between items-center">
+        <div class="text-xl font-extrabold text-slate-800 tracking-tight">AC/DC</div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-slate-500 font-medium">{{ user?.name }}<span v-if="user?.role === 'FT'" class="ml-1 text-brand font-bold">(FT)</span></span>
+          <button @click="handleLogout" class="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors">로그아웃</button>
+        </div>
       </div>
 
-      <div class="flex-grow flex flex-col items-center justify-center px-6 pb-12 w-full">
-
-        <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-slate-800 mb-1.5">반갑습니다 👋</h2>
-          <p class="text-slate-500 text-sm">성공적인 면접을 위해 무엇을 도와드릴까요?</p>
+      <div class="px-6 pb-8 flex-grow overflow-y-auto">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-slate-800 mb-1.5">역량평가 시뮬레이터</h2>
+          <p class="text-slate-500 text-sm">연습할 과제 유형을 선택하세요.</p>
         </div>
 
-        <div class="w-full space-y-4 px-8">
-          
-          <button @click="startInterview" class="w-full bg-brand text-white p-5 rounded-2xl shadow-lg shadow-brand/30 hover:bg-brandHover transition-all flex flex-col items-center gap-2 transform active:scale-95 relative overflow-hidden group">
-            <div class="absolute -top-10 -right-10 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all"></div>
-            <svg class="w-8 h-8 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-            </svg>
-            <div class="relative z-10 text-center">
-              <span class="block text-lg font-bold mb-0.5">면접 시작</span>
-              <span class="block text-[10px] text-brandLight font-medium">AI 스마트 거울과 함께 실전 연습</span>
-            </div>
-          </button>
+        <p v-if="errorMessage" class="mb-4 text-xs font-bold text-rose-500 text-center">{{ errorMessage }}</p>
 
-          <button @click="viewReports" class="w-full bg-white border-2 border-slate-100 text-slate-700 p-5 rounded-2xl shadow-sm hover:border-brand/40 hover:bg-slate-50 transition-all flex flex-col items-center gap-2 transform active:scale-95 group">
-            <svg class="w-8 h-8 text-slate-300 group-hover:text-brand transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            <div class="text-center">
-              <span class="block text-lg font-bold mb-0.5">면접 리포트</span>
-              <span class="block text-[10px] text-slate-400 font-medium transition-colors group-hover:text-slate-500">과거의 감정 분석 결과 확인하기</span>
-            </div>
-          </button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div v-for="card in cards" :key="card.type" class="rounded-2xl border-2 p-5 flex flex-col" :class="card.type === selectedType ? 'border-brand bg-brandLight/30' : 'border-slate-100'">
+            <button @click="selectType(card.type)" class="text-left">
+              <span class="block text-lg font-bold text-slate-800">{{ card.title }}</span>
+              <span class="block text-xs text-slate-500 mt-1">{{ card.desc }}</span>
+            </button>
 
+            <div v-if="card.type === selectedType" class="mt-4 space-y-2">
+              <p v-if="loading" class="text-xs text-slate-400">불러오는 중...</p>
+              <p v-else-if="!scenariosOf(card.type).length" class="text-xs text-slate-400">등록된 시나리오가 없습니다.</p>
+              <button
+                v-for="s in scenariosOf(card.type)"
+                :key="s.id"
+                @click="start(s)"
+                :disabled="starting"
+                class="w-full text-left bg-white border border-slate-200 hover:border-brand rounded-xl px-4 py-3 text-sm disabled:opacity-60 transition-colors"
+              >
+                <span class="block font-bold text-slate-700">{{ s.title }}</span>
+                <span class="block text-[11px] text-slate-400 mt-0.5">제한시간 {{ s.timeLimitMinutes }}분 · 시작하기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <h3 class="text-sm font-bold text-slate-700 mb-3">내 기록</h3>
+          <p v-if="!sessions.length" class="text-xs text-slate-400">아직 진행한 과제가 없습니다.</p>
+          <ul v-else class="space-y-2">
+            <li v-for="s in sessions" :key="s.id">
+              <button @click="openSession(s)" class="w-full flex items-center justify-between bg-slate-50 hover:bg-brandLight/40 rounded-xl px-4 py-3 text-left transition-colors">
+                <span>
+                  <span class="block text-sm font-bold text-slate-700">{{ s.scenarioTitle }}</span>
+                  <span class="block text-[11px] text-slate-400">{{ typeLabel(s.scenarioType) }} · {{ formatDate(s.createdAt) }}</span>
+                </span>
+                <span class="text-[11px] font-bold px-2 py-1 rounded-full" :class="finished(s) ? 'bg-brandLight text-brand' : 'bg-amber-100 text-amber-600'">{{ finished(s) ? '결과 보기' : '이어하기' }}</span>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -49,25 +63,71 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { createSession, FINISHED_STATUSES, listScenarios, listSessions } from '../api/acdc';
+import { getStoredUser, logout } from '../api/auth';
 
 const router = useRouter();
+const user = getStoredUser();
 
-// 🌟 면접 시작 버튼 클릭 시 작동하는 함수
-const startInterview = () => {
-    router.push('/job-select');
+const cards = [
+  { type: 'IN_BASKET', title: '서류함', desc: '결재함 안건을 파악하고 우선순위를 정해 답안을 작성합니다.' },
+  { type: 'ROLE_PLAY', title: '역할수행', desc: 'AI 상대역과 음성·텍스트로 면담하며 문제를 해결합니다.' }
+];
+
+const scenarios = ref([]);
+const sessions = ref([]);
+const selectedType = ref('');
+const loading = ref(true);
+const starting = ref(false);
+const errorMessage = ref('');
+
+const scenariosOf = (type) => scenarios.value.filter((s) => s.type === type);
+const typeLabel = (type) => (type === 'IN_BASKET' ? '서류함' : '역할수행');
+const finished = (s) => FINISHED_STATUSES.includes(s.status);
+const formatDate = (value) => (value ? new Date(value).toLocaleString('ko-KR') : '');
+
+const selectType = (type) => {
+  selectedType.value = selectedType.value === type ? '' : type;
 };
 
-// 리포트 버튼 클릭 시
-const viewReports = () => {
-    // 🌟 alert 창을 지우고, 방금 만든 리포트 뷰로 이동시킵니다!
-    router.push('/report');
+const load = async () => {
+  try {
+    const [scenarioList, sessionList] = await Promise.all([listScenarios(), listSessions()]);
+    scenarios.value = scenarioList || [];
+    sessions.value = sessionList || [];
+  } catch (error) {
+    errorMessage.value = error.message || '목록을 불러오지 못했습니다.';
+  } finally {
+    loading.value = false;
+  }
 };
 
-// 🌟 우측 상단 마이페이지 버튼 클릭 시 (아직 화면이 없으므로 임시 알림창 처리)
-// 홈 화면(HomeView.vue) 하단
-const goToMyPage = () => {
-    // 🌟 alert 창을 지우고, 방금 만든 마이페이지로 이동시킵니다!
-    router.push('/mypage'); 
+const goTo = (type, id) => router.push(`/${type === 'IN_BASKET' ? 'inbasket' : 'roleplay'}/${id}`);
+
+const start = async (scenario) => {
+  starting.value = true;
+  errorMessage.value = '';
+  try {
+    const session = await createSession({ scenarioId: scenario.id, participantName: user?.name });
+    goTo(scenario.type, session.id);
+  } catch (error) {
+    errorMessage.value = error.message || '세션을 만들지 못했습니다.';
+  } finally {
+    starting.value = false;
+  }
 };
+
+const openSession = (s) => {
+  if (finished(s)) router.push(`/result/${s.id}`);
+  else goTo(s.scenarioType, s.id);
+};
+
+const handleLogout = async () => {
+  await logout();
+  router.push('/login');
+};
+
+onMounted(load);
 </script>
