@@ -33,7 +33,7 @@ const routes = [
   { path: '/faq', name: 'faq', component: FaqView, meta: { requiresAuth: true, layout: 'shell' } },
   { path: '/inbasket/:id', name: 'inbasket', component: InBasketView, meta: { requiresAuth: true, layout: 'bare' } },
   { path: '/roleplay/:id', name: 'roleplay', component: RolePlayView, meta: { requiresAuth: true, layout: 'bare' } },
-  { path: '/submitted', name: 'submitted', component: SubmittedView, meta: { requiresAuth: true, layout: 'bare' } },
+  { path: '/submitted', name: 'submitted', component: SubmittedView, meta: { requiresAuth: true, layout: 'focus' } },
   { path: '/result/:id', name: 'result', component: ResultView, meta: { requiresAuth: true, layout: 'shell' } },
   { path: '/ft/review', name: 'ft-review', component: ReviewView, meta: { requiresAuth: true, requiresFT: true, layout: 'shell' } },
 

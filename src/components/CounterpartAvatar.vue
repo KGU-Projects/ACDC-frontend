@@ -1,10 +1,10 @@
 <template>
-  <div class="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-slate-700 to-slate-900 overflow-hidden select-none">
+  <div class="relative w-full h-full flex flex-col items-center justify-center bg-[#161c25] overflow-hidden select-none">
     <svg viewBox="0 0 200 240" class="h-[78%] max-h-[420px] w-auto" role="img" :aria-label="`${name || '상대역'} 아바타`">
       <!-- 몸/정장 -->
       <path d="M20 240 C20 190 55 170 100 170 C145 170 180 190 180 240 Z" fill="#334155" />
       <path d="M85 170 L100 205 L115 170 Z" fill="#f8fafc" />
-      <path d="M100 178 L95 200 L100 215 L105 200 Z" fill="#6366f1" />
+      <path d="M100 178 L95 200 L100 215 L105 200 Z" fill="#2a7a72" />
       <!-- 목 -->
       <rect x="88" y="145" width="24" height="30" rx="8" fill="#f1c9a5" />
       <!-- 머리카락(뒤) -->
@@ -36,17 +36,17 @@
       <path v-else d="M89 132 Q100 140 111 132" stroke="#b45353" stroke-width="3" fill="none" stroke-linecap="round" />
     </svg>
 
-    <div class="absolute left-3 bottom-3 bg-black/45 text-white rounded-lg px-3 py-1.5 backdrop-blur-sm">
-      <p class="text-sm font-bold leading-tight">{{ name || '상대역' }}</p>
-      <p v-if="position" class="text-[10px] opacity-80 leading-tight">{{ position }}</p>
+    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-control bg-black/60 px-3 py-1.5 text-white">
+      <p class="text-[14px] font-medium leading-tight">{{ name || '상대역' }}</p>
+      <p v-if="position" class="text-[12px] leading-tight text-white/80">{{ position }}</p>
     </div>
 
-    <div v-if="thinking" class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/45 text-white text-xs font-bold rounded-full px-3 py-1">
+    <div v-if="thinking" class="absolute left-1/2 top-14 -translate-x-1/2 flex items-center gap-1.5 rounded-chip bg-black/60 px-3 py-1 text-[12px] text-white">
       <span class="dot"></span><span class="dot"></span><span class="dot"></span>
       <span class="ml-1">생각 중</span>
     </div>
-    <div v-else-if="speaking" class="absolute top-3 left-3 flex items-center gap-1.5 bg-emerald-500/80 text-white text-xs font-bold rounded-full px-3 py-1">
-      <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>말하는 중
+    <div v-else-if="speaking" class="absolute left-1/2 top-14 -translate-x-1/2 flex items-center gap-1.5 rounded-chip bg-black/60 px-3 py-1 text-[12px] text-white">
+      <span class="h-1.5 w-1.5 rounded-full bg-[#7cc4bb]"></span>말하는 중
     </div>
   </div>
 </template>
