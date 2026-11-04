@@ -19,7 +19,7 @@ import { getStoredUser } from './api/auth';
 // meta.layout: 'shell'(사이드바), 'focus'(상단 바만), 'bare'(기본, 래퍼 없음)
 // /inbasket·/roleplay는 각 페이지가 자체 상단 바(타이머·제출)를 그리므로 'bare'로 두고, /submitted는 'focus'를 쓴다.
 const routes = [
-  { path: '/', redirect: '/login' },
+  { path: '/', redirect: () => (localStorage.getItem('accessToken') ? '/home' : '/login') },
 
   { path: '/login', name: 'login', component: LoginView, meta: { layout: 'bare' } },
   { path: '/signup', name: 'signup', component: SignupView, meta: { layout: 'bare' } },
@@ -37,7 +37,7 @@ const routes = [
   { path: '/result/:id', name: 'result', component: ResultView, meta: { requiresAuth: true, layout: 'shell' } },
   { path: '/ft/review', name: 'ft-review', component: ReviewView, meta: { requiresAuth: true, requiresFT: true, layout: 'shell' } },
 
-  { path: '/:pathMatch(.*)*', redirect: '/login' }
+  { path: '/:pathMatch(.*)*', redirect: () => (localStorage.getItem('accessToken') ? '/home' : '/login') }
 ];
 
 const router = createRouter({
