@@ -87,7 +87,7 @@
         <button @click="chatOpen = !chatOpen" class="absolute bottom-3 left-3 z-30 h-11 rounded-control border border-white/40 bg-stage/85 px-4 text-[14px] font-medium text-white lg:hidden" :class="chatOpen ? 'hidden' : ''">채팅 열기</button>
         <button v-if="chatOpen" @click="chatOpen = false" class="absolute left-[calc(85%-2.75rem)] top-14 z-30 flex h-11 w-11 items-center justify-center rounded-control bg-stage/85 text-[18px] text-white sm:left-[calc(50%-2.75rem)] lg:hidden" aria-label="채팅 접기">×</button>
 
-        <div class="absolute bottom-3 right-3 z-30 aspect-video w-32 overflow-hidden rounded-card border border-white/60 bg-stageRaised transition-opacity sm:w-52" :class="chatOpen ? 'max-sm:pointer-events-none max-sm:opacity-0' : ''" data-testid="self-view">
+        <div class="absolute bottom-3 right-3 z-30 aspect-video w-64 overflow-hidden rounded-card border border-white/60 bg-stageRaised transition-opacity sm:w-[26rem]" :class="chatOpen ? 'max-sm:pointer-events-none max-sm:opacity-0' : ''" data-testid="self-view">
           <video ref="selfVideoRef" autoplay muted playsinline class="h-full w-full -scale-x-100 object-cover"></video>
           <span class="absolute left-1.5 top-1.5 rounded-chip bg-black/60 px-1.5 py-0.5 text-[12px] text-white">나</span>
           <div class="absolute inset-x-1.5 bottom-1.5 h-1 overflow-hidden rounded-chip bg-black/50" title="마이크 레벨">
