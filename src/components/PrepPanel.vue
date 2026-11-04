@@ -1,8 +1,14 @@
 <template>
   <div class="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-5 lg:grid-rows-[minmax(0,1fr)]" data-testid="prep-panel">
-    <section class="min-h-0 overflow-y-auto rounded-card border border-line bg-surface p-5 text-[14px] leading-6 text-ink lg:col-span-3" aria-label="과제 자료">
-      <div class="space-y-5">
-        <a v-if="scenario.materialsPdf" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="inline-block text-[13px] text-ink underline underline-offset-2">과제 원본 PDF 보기 (새 탭)</a>
+    <section class="flex min-h-[60vh] flex-col rounded-card border border-line bg-surface text-[14px] leading-6 text-ink lg:col-span-3 lg:min-h-0" aria-label="과제 자료">
+      <div v-if="scenario.materialsPdf" class="flex shrink-0 gap-1 border-b border-line px-2">
+        <button v-for="t in materialTabs" :key="t.key" @click="materialTab = t.key" :aria-current="materialTab === t.key ? 'true' : undefined"
+          class="-mb-px h-11 shrink-0 whitespace-nowrap border-b-2 px-3 text-[14px] md:h-10"
+          :class="materialTab === t.key ? 'border-ink font-medium text-ink' : 'border-transparent text-muted hover:text-ink'">{{ t.label }}</button>
+        <a v-if="materialTab === 'pdf'" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="ml-auto flex shrink-0 items-center whitespace-nowrap px-3 text-[13px] text-muted underline underline-offset-2 hover:text-ink">새 탭에서 열기</a>
+      </div>
+      <iframe v-if="scenario.materialsPdf && materialTab === 'pdf'" :src="scenario.materialsPdf" title="과제 원본 PDF" class="block h-full min-h-[60vh] w-full flex-1 border-0 lg:min-h-0"></iframe>
+      <div v-else class="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         <div v-if="scenario.situation"><h3 class="mb-1 text-[14px] font-semibold">상황</h3><p class="whitespace-pre-wrap">{{ scenario.situation }}</p></div>
         <div v-if="scenario.participantRole"><h3 class="mb-1 text-[14px] font-semibold">나의 역할</h3><p class="whitespace-pre-wrap">{{ scenario.participantRole }}</p></div>
         <div v-for="m in scenario.materials" :key="m.id" class="border-t border-rule pt-4">
@@ -45,6 +51,9 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+
+const materialTab = ref('pdf');
+const materialTabs = [{ key: 'pdf', label: '원본 PDF' }, { key: 'summary', label: '요약' }];
 
 const props = defineProps({
   scenario: { type: Object, default: () => ({}) },
