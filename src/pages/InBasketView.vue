@@ -36,9 +36,10 @@
               class="-mb-px h-11 shrink-0 whitespace-nowrap border-b-2 px-3 text-[14px] md:h-10"
               :class="tab === t.key ? 'border-ink font-medium text-ink' : 'border-transparent text-muted hover:text-ink'"
             >{{ t.label }}</button>
+            <a v-if="tab === 'pdf'" :href="scenario.materialsPdf" target="_blank" rel="noopener" class="ml-auto flex shrink-0 items-center whitespace-nowrap px-3 text-[13px] text-muted underline underline-offset-2 hover:text-ink">새 탭에서 열기</a>
           </div>
 
-          <div class="min-h-0 flex-1 overflow-y-auto p-5 text-[14px] leading-6 text-ink">
+          <div class="min-h-0 flex-1 text-[14px] leading-6 text-ink" :class="tab === 'pdf' ? 'overflow-hidden' : 'overflow-y-auto p-5'">
             <div v-if="tab === 'guide'" class="space-y-5">
               <div v-if="scenario.situation"><h3 class="mb-1 text-[14px] font-semibold text-ink">상황</h3><p class="whitespace-pre-wrap">{{ scenario.situation }}</p></div>
               <div v-if="scenario.participantRole"><h3 class="mb-1 text-[14px] font-semibold text-ink">나의 역할</h3><p class="whitespace-pre-wrap">{{ scenario.participantRole }}</p></div>
@@ -56,10 +57,7 @@
               </div>
             </div>
 
-            <div v-else-if="tab === 'pdf'" class="h-[70vh]">
-              <iframe :src="scenario.materialsPdf" title="과제 원본 PDF" class="h-full w-full rounded-control border border-line"></iframe>
-              <a :href="scenario.materialsPdf" target="_blank" rel="noopener" class="mt-2 inline-block text-[13px] text-ink underline underline-offset-2">새 탭에서 열기</a>
-            </div>
+            <iframe v-else-if="tab === 'pdf'" :src="scenario.materialsPdf" title="과제 원본 PDF" class="block h-full min-h-[60vh] w-full border-0 lg:min-h-0"></iframe>
 
             <div v-else class="divide-y divide-rule">
               <div v-for="m in scenario.materials" :key="m.id" class="py-4 first:pt-0 last:pb-0">
