@@ -24,6 +24,7 @@
         <p class="mt-1 text-[14px] font-medium" :class="session.stage === 'FAILED' || session.stage === 'ABORTED' ? 'text-negative' : 'text-ink'">{{ stageLabel }}</p>
         <div class="mt-4 max-w-[560px]"><StageTrack :stage="session.stage" :mode="session.mode" size="full" /></div>
         <p class="mt-5 text-[14px] leading-6 text-muted">{{ stageMessage }}</p>
+        <p v-if="recording" class="mt-1 text-[13px]" :class="recording.tone === 'negative' ? 'text-negative' : 'text-muted'">{{ recording.text }}</p>
         <RouterLink to="/records" class="mt-3 inline-flex min-h-11 items-center text-[14px] font-medium text-ink underline underline-offset-2 md:min-h-0">나의 응시 내역 보기</RouterLink>
       </section>
 
@@ -46,12 +47,16 @@
               </div>
               <div class="text-right tabular-nums">
                 <p class="text-ink"><span class="text-[24px] font-normal leading-8 tracking-[-0.02em]">{{ scoreOf(e) }}</span><span class="text-[13px] text-muted"> / 5</span></p>
-                <p v-if="e.finalScore != null && e.finalScore !== e.aiScore" class="text-[12px] text-muted">AI {{ e.aiScore }} → FT 확정</p>
-                <p v-else-if="e.finalScore != null" class="text-[12px] text-muted">FT 확정</p>
+                <!-- 연습 세션도 finalScore가 aiScore로 채워져 오므로, 세션이 CONFIRMED일 때만 FT 확정을 표시한다 -->
+                <p v-if="session.status === 'CONFIRMED' && e.finalScore != null && e.finalScore !== e.aiScore" class="text-[12px] text-muted">AI {{ e.aiScore }} → FT 확정</p>
+                <p v-else-if="session.status === 'CONFIRMED' && e.finalScore != null" class="text-[12px] text-muted">FT 확정</p>
               </div>
             </li>
           </ul>
         </section>
+
+        <p v-if="recording?.tone === 'negative'" class="mt-3 rounded-card border border-line bg-surface px-5 py-3 text-[13px] text-negative">{{ recording.text }}</p>
+        <NonverbalTable class="mt-3" :features="session.nonverbalFeatures" />
 
         <h2 class="mb-3 mt-8 text-[16px] font-semibold text-ink">역량별 피드백</h2>
         <div class="space-y-3">
@@ -101,7 +106,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { getSession } from '../api/acdc';
-import { STAGE_LABELS, formatDate, modeLabel, typeLabel } from '../composables/stage';
+import { STAGE_LABELS, formatDate, modeLabel, recordingNotice, typeLabel } from '../composables/stage';
+import NonverbalTable from '../components/NonverbalTable.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import StageTrack from '../components/ui/StageTrack.vue';
 
@@ -115,6 +121,7 @@ const STAGE_MESSAGES = {
   FAILED: '채점에 실패했습니다. 담당 FT에게 문의해 주세요',
   ABORTED: '제한 시간 안에 제출되지 않아 중단되었습니다'
 };
+const recording = computed(() => recordingNotice(session.value?.recordingStatus));
 const stageLabel = computed(() => STAGE_LABELS[session.value?.stage] || session.value?.stage || '');
 const stageMessage = computed(() => STAGE_MESSAGES[session.value?.stage] || '채점이 진행 중입니다. 잠시 후 다시 확인해 주세요.');
 

@@ -14,6 +14,7 @@ import RecordsView from './pages/RecordsView.vue';
 import ResultsView from './pages/ResultsView.vue';
 import GuideView from './pages/GuideView.vue';
 import FaqView from './pages/FaqView.vue';
+import ScenariosAdminView from './pages/ScenariosAdminView.vue';
 import { getStoredUser } from './api/auth';
 
 // meta.layout: 'shell'(사이드바), 'focus'(상단 바만), 'bare'(기본, 래퍼 없음)
@@ -36,6 +37,8 @@ const routes = [
   { path: '/submitted', name: 'submitted', component: SubmittedView, meta: { requiresAuth: true, layout: 'focus' } },
   { path: '/result/:id', name: 'result', component: ResultView, meta: { requiresAuth: true, layout: 'shell' } },
   { path: '/ft/review', name: 'ft-review', component: ReviewView, meta: { requiresAuth: true, requiresFT: true, layout: 'shell' } },
+
+  { path: '/admin/scenarios', name: 'admin-scenarios', component: ScenariosAdminView, meta: { requiresAuth: true, requiresFT: true, layout: 'shell' } },
 
   { path: '/:pathMatch(.*)*', redirect: () => (localStorage.getItem('accessToken') ? '/home' : '/login') }
 ];

@@ -28,6 +28,36 @@ export const stageTone = (stage) => {
   return 'neutral';
 };
 
+// 면담 영상 분석 상태(세션 응답의 recordingStatus). 안내할 필요가 없으면 null이다.
+export const recordingNotice = (status) => {
+  switch (status) {
+    case 'AWAITING_UPLOAD':
+      return { text: '영상 업로드 대기 중', tone: 'neutral' };
+    case 'UPLOADED':
+    case 'ANALYZING':
+      return { text: '영상 분석 중', tone: 'neutral' };
+    case 'FAILED':
+      return { text: '영상 분석 실패(영상 없이 채점)', tone: 'negative' };
+    default:
+      return null;
+  }
+};
+
+// 비언어 분석 항목 이름과 단위. 모르는 키는 이름·값만 보여 주고 좋고 나쁨은 해석하지 않는다.
+export const NONVERBAL_LABELS = {
+  // scale: 서버는 0~1 비율로 주므로 화면에는 100을 곱해 %로 보여 준다
+  gaze_front_ratio: { label: '정면 응시 비율', unit: '%', scale: 100 },
+  gaze_stability: { label: '시선 안정성', unit: '' },
+  gaze_duration: { label: '평균 응시 지속 시간', unit: '초' },
+  gaze_down_ratio: { label: '시선 하향 비율', unit: '%', scale: 100 },
+  au4_activation: { label: '미간 활성', unit: '' },
+  facial_asymmetry: { label: '얼굴 비대칭', unit: '' },
+  tension_level: { label: '긴장 수준', unit: '' },
+  positive_emotion: { label: '긍정 감정', unit: '' },
+  nod_frequency: { label: '끄덕임', unit: '' },
+  forward_lean_angle: { label: '앞으로 기울임', unit: '도' }
+};
+
 const pad = (n) => String(n).padStart(2, '0');
 // 2026.11.03 14:05 형식으로 통일한다.
 export const formatDate = (value) => {

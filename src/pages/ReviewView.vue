@@ -57,6 +57,9 @@
             <p v-else class="whitespace-pre-wrap text-[14px] leading-6 text-ink">{{ detail.answer }}</p>
           </div>
 
+          <p v-if="recordingNotice(detail.recordingStatus)" class="text-[13px]" :class="recordingNotice(detail.recordingStatus).tone === 'negative' ? 'text-negative' : 'text-muted'">{{ recordingNotice(detail.recordingStatus).text }}</p>
+          <NonverbalTable :features="detail.nonverbalFeatures" />
+
           <p v-if="!editable" class="text-[13px] text-muted">읽기 전용입니다{{ detail.status === 'SCORED' ? '' : ' (검토 가능한 단계가 아님)' }}.</p>
 
           <article v-for="e in detail.evaluations || []" :key="e.competency" class="rounded-card border border-line bg-surface p-5">
@@ -107,7 +110,8 @@ import {
   setResultRelease
 } from '../api/acdc';
 import { getStoredUser } from '../api/auth';
-import { STAGE_LABELS, formatDate } from '../composables/stage';
+import { STAGE_LABELS, formatDate, recordingNotice } from '../composables/stage';
+import NonverbalTable from '../components/NonverbalTable.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import StatusPill from '../components/ui/StatusPill.vue';
 

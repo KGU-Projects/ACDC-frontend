@@ -103,7 +103,7 @@ const groups = computed(() => {
     { label: '평가 서비스', items: serviceItems },
     { label: '이용 지원', items: supportItems }
   ];
-  if (user?.role === 'FT') list.push({ label: '운영', items: [{ label: 'FT 검토', to: '/ft/review', icon: 'shield' }] });
+  if (user?.role === 'FT') list.push({ label: '운영', items: [{ label: 'FT 검토', to: '/ft/review', icon: 'shield' }, { label: '과제 등록', to: '/admin/scenarios', icon: 'file' }] });
   return list;
 });
 
