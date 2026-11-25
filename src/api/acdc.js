@@ -46,3 +46,9 @@ export const listAdminScenarios = () => apiGet('/api/admin/scenarios')
 export const getAdminScenario = (id) => apiGet(`/api/admin/scenarios/${id}`)
 export const generateRubric = (id, payload) => apiPost(`/api/admin/scenarios/${id}/rubric/generate`, payload)
 export const updateAdminScenario = (id, payload) => apiPut(`/api/admin/scenarios/${id}`, payload)
+// 평가 프롬프트(FT): prompt의 구조는 AI 서버가 정하고 화면은 그대로 주고받는다.
+export const generateEvaluationPrompt = (id, payload) => apiPost(`/api/admin/scenarios/${id}/evaluation-prompt/generate`, payload)
+export const listEvaluationPrompts = (id) => apiGet(`/api/admin/scenarios/${id}/evaluation-prompts`)
+export const saveEvaluationPrompt = (id, payload) => apiPost(`/api/admin/scenarios/${id}/evaluation-prompts`, payload)
+export const setEvaluationPromptActive = (id, promptId, active) =>
+  apiPut(`/api/admin/scenarios/${id}/evaluation-prompts/${promptId}/active`, { active })
