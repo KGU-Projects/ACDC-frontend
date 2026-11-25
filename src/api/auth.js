@@ -32,9 +32,12 @@ export const logout = async () => {
 
 export const getMe = () => apiGet('/api/v1/auth/me')
 
+// 로그인을 시작한 프론트 Origin을 함께 보내, 백엔드가 로그인 후 같은 프론트로 되돌려 보내게 한다.
 export const getGoogleOAuthUrl = () => {
+  const path = '/api/oauth2/authorization/google'
+  const query = `?frontend=${encodeURIComponent(window.location.origin)}`
   if (BACKEND_BASE_URL && BACKEND_BASE_URL !== '/') {
-    return new URL('/api/oauth2/authorization/google', `${BACKEND_BASE_URL}/`).toString()
+    return new URL(path, `${BACKEND_BASE_URL}/`).toString() + query
   }
-  return '/api/oauth2/authorization/google'
+  return path + query
 }
