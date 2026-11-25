@@ -16,6 +16,7 @@
         <span class="flex w-[112px] shrink-0 flex-col gap-1.5 sm:w-[168px]">
           <span class="truncate text-[12px] font-medium leading-4" :class="stageInk(s.stage)">{{ stageLabel(s.stage) }}</span>
           <StageTrack :stage="s.stage" :mode="s.mode" />
+          <span v-if="recordingNotice(s.recordingStatus)" class="truncate text-[12px] leading-4" :class="recordingNotice(s.recordingStatus).tone === 'negative' ? 'text-negative' : 'text-muted'">{{ recordingNotice(s.recordingStatus).text }}</span>
         </span>
         <AppIcon name="chevron-right" :size="16" class="hidden text-faint sm:block" :class="clickable(s) ? '' : 'invisible'" />
       </component>
@@ -26,7 +27,7 @@
 <script setup>
 import AppIcon from './ui/AppIcon.vue';
 import StageTrack from './ui/StageTrack.vue';
-import { canOpenResult, formatDate, modeLabel, stageLabel, typeLabel } from '../composables/stage';
+import { canOpenResult, formatDate, modeLabel, recordingNotice, stageLabel, typeLabel } from '../composables/stage';
 
 defineProps({ sessions: { type: Array, required: true } });
 const emit = defineEmits(['open']);

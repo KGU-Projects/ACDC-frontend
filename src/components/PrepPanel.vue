@@ -27,7 +27,7 @@
         <p v-if="stream" class="mb-3 text-center text-[12px]" :class="micOk ? 'text-positive' : 'text-[var(--pill-warning-fg)]'">{{ micOk ? '카메라 연결됨 · 마이크 연결됨' : '카메라 연결됨 · 마이크를 확인해 주세요' }}</p>
         <p class="text-center text-[13px] text-muted">과제 숙지 남은 시간</p>
         <p class="text-center text-[32px] font-semibold leading-10 tabular-nums text-ink" role="timer"><span class="sr-only">남은 시간 </span>{{ remainingLabel }}</p>
-        <p class="mt-2 text-center text-[12px] leading-5 text-muted">숙지 시간이 끝나면 자동으로 영상통화 면담이 시작됩니다.<br />면담은 카메라와 마이크를 켠 상태에서만 진행됩니다.</p>
+        <p class="mt-2 text-center text-[12px] leading-5 text-muted">숙지 시간이 끝나면 자동으로 영상통화 면담이 시작됩니다.<br />면담은 카메라와 마이크를 켠 상태에서만 진행됩니다.<br />면담 영상을 녹화해 제출 후 서버로 보내 시선·표정 분석에 사용합니다.</p>
         <p v-if="requesting" class="mt-3 text-center text-[13px] text-muted">카메라와 마이크를 확인하는 중...</p>
         <div v-if="mediaError" class="mt-3 text-center" role="alert">
           <p class="text-[13px] leading-5 text-negative">{{ mediaError }}</p>

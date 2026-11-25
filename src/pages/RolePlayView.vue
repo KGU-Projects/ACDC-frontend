@@ -51,7 +51,7 @@
           <p v-if="permissionWarning" class="mb-2 text-[14px] font-medium text-negative" role="alert">{{ permissionWarning }}</p>
           <p class="mb-4 text-[13px] leading-5 text-muted">
             역할수행은 영상통화 형식으로 진행되며, 평가를 위해 표정과 음성 특징을 분석합니다.<br />
-            영상 자체는 저장·전송하지 않고, 얼굴 이미지 정보와 음량·발화 시간 같은 수치만 서버로 보냅니다.
+            면담 영상을 녹화해 제출 후 서버로 보내 시선·표정 분석에 사용합니다. 면담 중에는 얼굴 이미지 정보와 음량·발화 시간 같은 수치도 서버로 보냅니다.
           </p>
           <div class="relative mb-4 aspect-video overflow-hidden rounded-card bg-stage">
             <video ref="gateVideoRef" autoplay muted playsinline class="h-full w-full -scale-x-100 object-cover"></video>
@@ -63,6 +63,30 @@
             <button @click="retryFromPermission" :disabled="requesting" class="h-11 rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover disabled:opacity-50 md:h-10">다시 요청</button>
             <button @click="leave" class="h-11 rounded-control btn-2 px-5 text-[14px] font-medium text-ink md:h-10">홈으로</button>
           </div>
+        </div>
+      </div>
+
+      <!-- 면담 영상 업로드: 제출은 이미 끝났고, 녹화본을 서버로 보내는 중이다 -->
+      <div v-else-if="phase === 'upload'" class="flex flex-1 items-start justify-center px-4 py-10 sm:items-center">
+        <div class="w-full max-w-lg rounded-card border border-line bg-surface p-6" role="status" aria-live="polite">
+          <h2 class="mb-1 text-[18px] font-semibold text-ink">{{ uploadFailed ? '영상 업로드에 실패했습니다' : '면담 영상을 업로드하는 중입니다' }}</h2>
+          <p class="mb-4 text-[13px] leading-5 text-muted">
+            답안 제출은 완료되었습니다. 영상은 시선·표정 분석에 사용되며, 올리지 못해도 영상 없이 채점됩니다.
+          </p>
+          <template v-if="!uploadFailed">
+            <div class="mb-2 h-2 overflow-hidden rounded-chip bg-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="Math.round(uploadProgress * 100)" aria-label="영상 업로드 진행률">
+              <div class="h-full bg-accent transition-[width] duration-200" :style="{ width: `${Math.round(uploadProgress * 100)}%` }"></div>
+            </div>
+            <p class="text-[13px] tabular-nums text-ink">{{ Math.round(uploadProgress * 100) }}%</p>
+            <p class="mt-3 text-[14px] font-medium text-ink">창을 닫지 마세요.</p>
+          </template>
+          <template v-else>
+            <p class="mb-4 text-[14px] leading-6 text-negative" role="alert">{{ uploadError }}</p>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <button @click="uploadPending" class="h-11 rounded-control bg-primary px-5 text-[14px] font-medium text-white hover:bg-primaryHover md:h-10">다시 업로드</button>
+              <button @click="skipUpload" class="h-11 rounded-control btn-2 px-5 text-[14px] font-medium text-ink md:h-10">영상 없이 계속</button>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -97,6 +121,7 @@
 
         <div class="pointer-events-none absolute right-3 top-14 z-30 flex flex-col items-end gap-1 text-[12px]" :class="chatOpen ? 'max-sm:hidden' : ''">
           <span class="flex items-center gap-1.5 rounded-chip bg-black/60 px-2 py-0.5 text-white"><span class="h-1.5 w-1.5 rounded-full bg-stageOk"></span>카메라·마이크 켜짐</span>
+          <span v-if="recorder.recording.value" class="flex items-center gap-1.5 rounded-chip bg-black/60 px-2 py-0.5 text-white" data-testid="recording-indicator"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-stageAlert"></span>녹화 중</span>
           <span v-if="face.unavailable.value" class="rounded-chip bg-stageWarnBg px-2 py-0.5 text-stageWarnFg">표정 분석 사용 불가</span>
           <span v-else-if="face.loading.value" class="rounded-chip bg-black/60 px-2 py-0.5 text-white">표정 분석 준비 중...</span>
           <span v-else-if="face.label.value" class="rounded-chip bg-black/60 px-2 py-0.5 text-white">표정: {{ emotionName(face.label.value) }}</span>
@@ -117,9 +142,11 @@ import CounterpartAvatar from '../components/CounterpartAvatar.vue';
 import PrepPanel from '../components/PrepPanel.vue';
 import { EMOTION_LABELS, useFaceEmotion } from '../composables/useFaceEmotion';
 import { useAudioFeatures } from '../composables/useAudioFeatures';
+import { useHeadPose } from '../composables/useHeadPose';
+import { useInterviewRecorder } from '../composables/useInterviewRecorder';
 import { useMediaCapture } from '../composables/useMediaCapture';
 import { useRoute, useRouter } from 'vue-router';
-import { getSession, sendTurn, startCall as startCallApi, startPrep, submitSession } from '../api/acdc';
+import { deleteRecording, getSession, sendTurn, startCall as startCallApi, startPrep, submitSession, uploadRecording } from '../api/acdc';
 import { useCountdown } from '../composables/useCountdown';
 
 const route = useRoute();
@@ -150,7 +177,19 @@ const aiSpeaking = ref(false);
 const { stream: mediaStream, error: mediaError, requesting, start: startMedia, stop: stopMedia } = useMediaCapture();
 const face = useFaceEmotion(sessionId);
 const audio = useAudioFeatures(sessionId);
+const headPose = useHeadPose();
+const recorder = useInterviewRecorder();
 let speakingTimer = null;
+
+// 제출 뒤 녹화본 업로드. Blob은 업로드가 끝나거나 포기할 때까지 들고 있는다(카메라는 제출 직후 끈다).
+const uploadProgress = ref(0);
+const uploadFailed = ref(false);
+const uploadError = ref('');
+let pendingRecording = null;
+const warnBeforeUnload = (event) => {
+  event.preventDefault();
+  event.returnValue = '';
+};
 
 const emotionName = (value) => EMOTION_LABELS[value] || value;
 
@@ -196,10 +235,12 @@ const enterCall = async (callSeconds) => {
   if (phase.value !== 'call' || !hasLiveStream()) return false;
   startCountdown(callSeconds, submit);
   audio.start(mediaStream.value);
+  recorder.start(mediaStream.value); // 이미 녹화 중이면 그대로 둔다(같은 페이지 재진입 시 중복 방지)
   const video = selfVideoRef.value;
   if (video && video.readyState < 2) {
     await new Promise((resolve) => video.addEventListener('loadeddata', resolve, { once: true }));
   }
+  headPose.start(selfVideoRef.value); // 표정 전송과 별개로 머리 자세 측정을 계속한다
   face.start(selfVideoRef.value);
   const last = messages.value[messages.value.length - 1];
   if (last?.speaker === 'AI') speakFor(last.text);
@@ -282,11 +323,13 @@ const retryFromPermission = async () => {
 
 const stopCapture = () => {
   face.dispose();
+  headPose.dispose();
   audio.stop();
   stopMedia();
 };
 
 const leave = () => {
+  recorder.discard();
   stopCapture();
   router.push('/home');
 };
@@ -298,6 +341,8 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 const speechSupported = Boolean(SpeechRecognition);
 let recognition = null;
 let baseDraft = '';
+// 음성 인식이 채운 그대로의 글. 보내는 시점에 입력창이 이와 같으면 VOICE, 고쳤거나 직접 입력했으면 TEXT다.
+let voiceDraft = null;
 
 const toggleListening = () => {
   if (listening.value) {
@@ -314,6 +359,8 @@ const toggleListening = () => {
     let text = '';
     for (let i = 0; i < event.results.length; i += 1) text += event.results[i][0].transcript;
     draft.value = baseDraft + text.trim();
+    // 인식 전에 직접 쓴 글이 섞여 있으면 음성만의 발화가 아니므로 TEXT로 둔다.
+    voiceDraft = baseDraft ? null : draft.value;
   };
   recognition.onerror = (event) => {
     if (event.error !== 'no-speech' && event.error !== 'aborted') {
@@ -338,10 +385,12 @@ const send = async () => {
   sending.value = true;
   errorMessage.value = '';
   try {
-    const res = await sendTurn(sessionId, text);
+    const inputMode = voiceDraft !== null && text === voiceDraft.trim() ? 'VOICE' : 'TEXT';
+    const res = await sendTurn(sessionId, text, inputMode);
     messages.value.push({ speaker: 'USER', text: res.userTurn.text }, { speaker: 'AI', text: res.aiTurn.text });
     speakFor(res.aiTurn.text);
     draft.value = '';
+    voiceDraft = null;
   } catch (error) {
     errorMessage.value = error.message || '발화를 전송하지 못했습니다.';
   } finally {
@@ -361,14 +410,61 @@ const submit = async () => {
   recognition?.stop();
   try {
     face.stop();
+    headPose.stop();
+    // 녹화 종료를 기다려 Blob을 확정한 뒤 제출한다. 업로드는 제출 이후라 길어져도 시간 만료로 끊기지 않는다.
+    const recording = await recorder.stop().catch(() => null);
     await audio.flush();
-    await submitSession(sessionId);
+    const frontendFeatures = headPose.getFeatures(); // 유효 샘플이 30초 미만이면 {}
+    await submitSession(sessionId, { recordingExpected: Boolean(recording), frontendFeatures });
     stopCapture();
-    router.replace('/submitted');
+    if (recording) {
+      pendingRecording = recording;
+      await uploadPending(true);
+    } else {
+      goSubmitted();
+    }
   } catch (error) {
     errorMessage.value = error.message || '제출에 실패했습니다.';
     submitting.value = false;
   }
+};
+
+const goSubmitted = () => {
+  router.replace({ path: '/submitted', query: { session: sessionId } });
+};
+
+// 제출이 끝난 뒤 녹화본을 올린다. 실패해도 제출은 유효하므로 다시 올리거나 영상 없이 계속할 수 있다.
+const uploadPending = async (first = false) => {
+  if (!pendingRecording) return goSubmitted();
+  if (first === true) phase.value = 'upload';
+  uploadFailed.value = false;
+  uploadError.value = '';
+  uploadProgress.value = 0;
+  window.addEventListener('beforeunload', warnBeforeUnload);
+  try {
+    await uploadRecording(sessionId, pendingRecording.blob, pendingRecording.filename, (ratio) => {
+      uploadProgress.value = ratio;
+    });
+    pendingRecording = null;
+    recorder.discard();
+    window.removeEventListener('beforeunload', warnBeforeUnload);
+    goSubmitted();
+  } catch (error) {
+    window.removeEventListener('beforeunload', warnBeforeUnload);
+    uploadFailed.value = true;
+    uploadError.value = error.message || '영상을 업로드하지 못했습니다.';
+  }
+};
+
+const skipUpload = async () => {
+  pendingRecording = null;
+  recorder.discard();
+  try {
+    await deleteRecording(sessionId); // 서버가 업로드를 기다리지 않고 바로 채점하게 한다
+  } catch {
+    // 실패해도 이동은 막지 않는다(서버가 업로드 대기 시간 뒤에 채점을 시작한다)
+  }
+  goSubmitted();
 };
 
 onMounted(async () => {
@@ -410,6 +506,8 @@ onBeforeUnmount(() => {
   recognition?.abort();
   clearTimeout(speakingTimer);
   clearTimeout(expiryRetryTimer);
+  window.removeEventListener('beforeunload', warnBeforeUnload);
+  recorder.discard();
   stopCapture();
 });
 </script>

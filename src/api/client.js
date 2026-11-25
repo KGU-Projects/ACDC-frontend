@@ -130,3 +130,55 @@ export const apiPost = (path, payload, options = {}) =>
   })
 export const apiPut = (path, payload) =>
   apiRequest(path, { method: 'PUT', body: JSON.stringify(payload) })
+
+/**
+ * multipart 업로드(진행률 지원). fetch는 업로드 진행률을 주지 않아 XHR을 쓴다.
+ * Content-Type은 직접 지정하지 않는다(브라우저가 boundary를 붙인다). 401이면 재발급 후 한 번만 재시도한다.
+ * 성공하면 봉투를 푼 data를, 실패하면 apiRequest와 같은 모양의 Error를 던진다.
+ */
+export const apiUpload = async (path, formData, { onProgress } = {}) => {
+  const send = () =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', apiUrl(path))
+      xhr.setRequestHeader('ngrok-skip-browser-warning', 'true')
+      const token = getAccessToken()
+      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) onProgress?.(event.loaded / event.total)
+      }
+      xhr.onerror = () => reject(new Error('네트워크 오류로 업로드하지 못했습니다.'))
+      xhr.ontimeout = () => reject(new Error('업로드 시간이 초과되었습니다.'))
+      xhr.onload = () => {
+        let body = null
+        if (xhr.responseText) {
+          try {
+            body = JSON.parse(xhr.responseText)
+          } catch {
+            body = xhr.responseText
+          }
+        }
+        resolve({ status: xhr.status, ok: xhr.status >= 200 && xhr.status < 300, body })
+      }
+      xhr.send(formData)
+    })
+
+  let result = await send()
+  if (result.status === 401 && localStorage.getItem(REFRESH_KEY)) {
+    try {
+      await refreshSession()
+    } catch {
+      clearAuthSession()
+      window.location.assign('/login')
+      throw new Error('세션이 만료되었습니다. 다시 로그인해주세요.')
+    }
+    onProgress?.(0)
+    result = await send()
+  }
+
+  const { body } = result
+  const isApiFailure = body && typeof body === 'object' && body.success === false
+  if (!result.ok || isApiFailure) throw toError({ status: result.status }, typeof body === 'object' ? body : null)
+  if (body && typeof body === 'object' && 'data' in body) return body.data
+  return body
+}
