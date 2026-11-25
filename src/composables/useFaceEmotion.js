@@ -1,6 +1,5 @@
 import { onBeforeUnmount, ref } from 'vue'
-import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
-import { FACE_LANDMARKER_MODEL_URL, MEDIAPIPE_WASM_URL } from '../config/env'
+import { acquireLandmarker, releaseLandmarker } from './faceLandmarker'
 import { sendEmotion } from '../api/acdc'
 
 // interviewMirror의 얼굴 전처리와 같은 값(AI 서버 ONNX 모델 입력: 1x3x224x224, ImageNet 정규화)
@@ -37,22 +36,7 @@ export function useFaceEmotion(sessionId) {
 
   const initLandmarker = async () => {
     if (landmarker) return landmarker
-    const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL)
-    const options = {
-      baseOptions: { modelAssetPath: FACE_LANDMARKER_MODEL_URL, delegate: 'GPU' },
-      runningMode: 'VIDEO',
-      numFaces: 1,
-      outputFaceBlendshapes: false
-    }
-    try {
-      landmarker = await FaceLandmarker.createFromOptions(vision, options)
-    } catch (gpuError) {
-      console.warn('MediaPipe GPU 초기화 실패, CPU로 재시도합니다:', gpuError)
-      landmarker = await FaceLandmarker.createFromOptions(vision, {
-        ...options,
-        baseOptions: { ...options.baseOptions, delegate: 'CPU' }
-      })
-    }
+    landmarker = await acquireLandmarker() // 머리 자세 측정과 한 인스턴스를 나눠 쓴다
     return landmarker
   }
 
@@ -152,7 +136,7 @@ export function useFaceEmotion(sessionId) {
 
   const dispose = () => {
     stop()
-    landmarker?.close?.()
+    if (landmarker) releaseLandmarker()
     landmarker = null
   }
 

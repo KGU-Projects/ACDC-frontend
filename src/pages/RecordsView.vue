@@ -36,6 +36,7 @@
               <td class="px-5 py-3">
                 <span class="mb-1.5 block truncate text-[12px] font-medium leading-4" :class="s.stage === 'FAILED' || s.stage === 'ABORTED' ? 'text-negative' : 'text-ink'">{{ stageLabel(s.stage) }}</span>
                 <StageTrack :stage="s.stage" :mode="s.mode" />
+                <span v-if="recordingNotice(s.recordingStatus)" class="mt-1 block truncate text-[12px] leading-4" :class="recordingNotice(s.recordingStatus).tone === 'negative' ? 'text-negative' : 'text-muted'">{{ recordingNotice(s.recordingStatus).text }}</span>
               </td>
             </tr>
           </tbody>
@@ -56,7 +57,7 @@ import LoadError from '../components/LoadError.vue';
 import ListPlaceholder from '../components/ListPlaceholder.vue';
 import SessionRows from '../components/SessionRows.vue';
 import { useSessions } from '../composables/useSessions';
-import { canOpenResult, formatDate, modeLabel, stageLabel, typeLabel } from '../composables/stage';
+import { canOpenResult, formatDate, modeLabel, recordingNotice, stageLabel, typeLabel } from '../composables/stage';
 
 const { sessions, loading, loadFailed, refresh, openSession } = useSessions();
 const clickable = (s) => s.stage === 'IN_PROGRESS' || canOpenResult(s.stage);
