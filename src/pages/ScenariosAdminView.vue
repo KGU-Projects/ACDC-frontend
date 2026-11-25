@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="과제 등록" subtitle="원문이나 PDF로 과제를 만들고, 채점기준을 생성한 뒤 공개합니다." />
+    <PageHeader title="과제 등록" subtitle="원문이나 PDF로 과제를 만들고, 채점기준과 평가 프롬프트를 생성한 뒤 공개합니다." />
 
     <!-- 1. 과제 생성 -->
     <section class="mb-3 rounded-card border border-line bg-surface p-5" aria-labelledby="gen-title">
@@ -74,6 +74,7 @@
                 {{ typeLabel(s.type) }} · {{ s.timeLimitMinutes }}분
                 <StatusPill :tone="s.published ? 'accent' : 'neutral'" :label="s.published ? '공개' : '비공개'" />
                 <StatusPill :tone="s.hasRubric ? 'positive' : 'warning'" :label="s.hasRubric ? '채점기준 있음' : '채점기준 없음'" />
+                <StatusPill :tone="promptPill(s).tone" :label="promptPill(s).label" />
                 <StatusPill tone="neutral" :label="s.source === 'BUNDLED' ? '기본 제공' : '직접 등록'" />
               </span>
             </button>
@@ -147,6 +148,17 @@
             </div>
           </div>
 
+          <!-- 평가 프롬프트: 기본 제공 과제에도 쓸 수 있다 -->
+          <EvaluationPromptCard
+            ref="promptCard"
+            :key="detail.id"
+            :scenario-id="detail.id"
+            :has-rubric="hasRubric"
+            :prompt-status="detail.promptStatus"
+            :prompt-version="detail.promptVersion"
+            @changed="refresh(detail.id)"
+          />
+
           <!-- 공개 -->
           <div v-if="!readOnly" class="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-surface p-5">
             <p class="text-[13px] text-muted">{{ publishHint }}</p>
@@ -161,7 +173,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 import {
   createAdminScenario,
   generateRubric,
@@ -171,7 +183,9 @@ import {
   updateAdminScenario
 } from '../api/acdc';
 import { filesToPayload } from '../composables/files';
+import { promptStatusView } from '../composables/evaluationPrompt';
 import { typeLabel } from '../composables/stage';
+import EvaluationPromptCard from '../components/EvaluationPromptCard.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import StatusPill from '../components/ui/StatusPill.vue';
 import ScenarioSourceInput from '../components/ScenarioSourceInput.vue';
@@ -269,9 +283,13 @@ const readOnly = computed(() => detail.value?.source === 'BUNDLED');
 // 목록의 hasRubric이 서버 기준이다. 상세 응답에 있으면 그것을 우선한다.
 const hasRubric = computed(() => detail.value?.hasRubric ?? scenarios.value.find((s) => s.id === selectedId.value)?.hasRubric ?? false);
 const publishHint = computed(() => {
-  if (detail.value?.published) return '현재 참가자에게 공개되어 있습니다.';
-  return hasRubric.value ? '채점기준이 있어 공개할 수 있습니다.' : '채점기준을 먼저 생성·저장해야 공개할 수 있습니다.';
+  const scoring = detail.value?.promptStatus === 'ACTIVE' ? '' : ' 사용 중인 평가 프롬프트가 없어 기본 방식으로 채점합니다.';
+  if (detail.value?.published) return `현재 참가자에게 공개되어 있습니다.${scoring}`;
+  return hasRubric.value ? `채점기준이 있어 공개할 수 있습니다.${scoring}` : '채점기준을 먼저 생성·저장해야 공개할 수 있습니다.';
 });
+
+const promptCard = ref(null);
+const promptPill = (s) => promptStatusView(s.promptStatus, s.promptVersion);
 
 const showMessage = (text, isError = false) => {
   detailMessage.value = text;
@@ -304,6 +322,8 @@ const select = async (id) => {
   await load(id);
 };
 
+const refresh = (id) => Promise.all([selectedId.value === id ? load(id) : null, loadList()]);
+
 // 대상 과제 id를 인자로 받는다. 저장하는 동안 선택이 바뀌었으면 지금 보는 과제의 메시지·상세는 건드리지 않는다.
 const update = async (id, payload, done) => {
   if (savingIds.value[id]) return false;
@@ -311,7 +331,9 @@ const update = async (id, payload, done) => {
   if (selectedId.value === id) showMessage('');
   try {
     await updateAdminScenario(id, payload);
-    await Promise.all([selectedId.value === id ? load(id) : null, loadList()]);
+    await refresh(id);
+    // 과제 본문이 바뀌면 저장된 프롬프트가 '이전 과제 기준'이 될 수 있어 목록을 다시 읽는다.
+    if (selectedId.value === id) promptCard.value?.reload();
     if (selectedId.value === id) showMessage(done);
     return true;
   } catch (error) {
@@ -336,7 +358,7 @@ const generateRubricDraft = async () => {
   rubricDraft.value = null;
   try {
     const res = await generateRubric(id, await sourcePayload(source));
-    if (selectedId.value === id) rubricDraft.value = { ...res, scenarioId: id };
+    if (selectedId.value === id) rubricDraft.value = { ...res, scenarioId: id, source };
   } catch (error) {
     if (selectedId.value === id) rubricError.value = error.message || '채점기준을 생성하지 못했습니다.';
   } finally {
@@ -345,12 +367,14 @@ const generateRubricDraft = async () => {
 };
 
 // 응답의 scenario(채점기준이 반영된 과제 본문)를 초안을 만든 과제의 body로 PUT한다.
+// 저장하면 채점기준을 만들 때 쓴 자료로 평가 프롬프트를 이어서 생성한다. 실패해도 채점기준 저장은 유지된다.
 const saveRubric = async () => {
   const draft = rubricDraft.value;
   if (!draft) return;
-  if (await update(draft.scenarioId, { body: draft.scenario }, '채점기준을 저장했습니다.') && rubricDraft.value === draft) {
-    rubricDraft.value = null;
-  }
+  if (!(await update(draft.scenarioId, { body: draft.scenario }, '채점기준을 저장했습니다.'))) return;
+  if (rubricDraft.value === draft) rubricDraft.value = null;
+  await nextTick();
+  if (selectedId.value === draft.scenarioId && detail.value?.id === draft.scenarioId) promptCard.value?.generate(draft.source);
 };
 
 onMounted(loadList);
