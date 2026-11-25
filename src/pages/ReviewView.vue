@@ -60,6 +60,7 @@
           <p v-if="recordingNotice(detail.recordingStatus)" class="text-[13px]" :class="recordingNotice(detail.recordingStatus).tone === 'negative' ? 'text-negative' : 'text-muted'">{{ recordingNotice(detail.recordingStatus).text }}</p>
           <NonverbalTable :features="detail.nonverbalFeatures" />
 
+          <p v-if="detail.evaluationPromptVersion" class="text-[12px] text-muted tabular-nums">평가 프롬프트 v{{ detail.evaluationPromptVersion }}로 채점했습니다.</p>
           <p v-if="!editable" class="text-[13px] text-muted">읽기 전용입니다{{ detail.status === 'SCORED' ? '' : ' (검토 가능한 단계가 아님)' }}.</p>
 
           <article v-for="e in detail.evaluations || []" :key="e.competency" class="rounded-card border border-line bg-surface p-5">
