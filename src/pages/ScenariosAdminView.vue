@@ -247,12 +247,23 @@ const detail = ref(null);
 const detailError = ref('');
 const detailMessage = ref('');
 const detailMessageError = ref(false);
-const busy = ref(false);
 const edit = reactive({ title: '', timeLimitMinutes: null });
 const rubricForm = reactive({ sourceText: '', files: [] });
-const rubricGenerating = ref(false);
 const rubricError = ref('');
+// 초안에는 만든 과제의 id(scenarioId)를 함께 둔다. 저장 대상은 항상 이 id다.
 const rubricDraft = ref(null);
+
+// 진행 중인 작업을 과제 id별로 따로 센다. 다른 과제를 보는 동안 끝난 작업이 지금 보는 과제의 버튼 상태를 바꾸지 않는다.
+const savingIds = ref({});
+const generatingIds = ref({});
+const busy = computed(() => Boolean(savingIds.value[selectedId.value]));
+const rubricGenerating = computed(() => Boolean(generatingIds.value[selectedId.value]));
+const markInFlight = (map, id, on) => {
+  const next = { ...map.value };
+  if (on) next[id] = true;
+  else delete next[id];
+  map.value = next;
+};
 
 const readOnly = computed(() => detail.value?.source === 'BUNDLED');
 // 목록의 hasRubric이 서버 기준이다. 상세 응답에 있으면 그것을 우선한다.
@@ -267,13 +278,17 @@ const showMessage = (text, isError = false) => {
   detailMessageError.value = isError;
 };
 
+// 늦게 온 응답이 지금 선택한 다른 과제의 상세를 덮지 않도록, 응답 시점에 선택이 바뀌었으면 버린다.
 const load = async (id) => {
-  detailError.value = '';
+  if (selectedId.value === id) detailError.value = '';
   try {
-    detail.value = await getAdminScenario(id);
-    edit.title = detail.value.title || '';
-    edit.timeLimitMinutes = detail.value.timeLimitMinutes;
+    const data = await getAdminScenario(id);
+    if (selectedId.value !== id) return;
+    detail.value = data;
+    edit.title = data.title || '';
+    edit.timeLimitMinutes = data.timeLimitMinutes;
   } catch (error) {
+    if (selectedId.value !== id) return;
     detailError.value = error.message || '과제를 불러오지 못했습니다.';
   }
 };
@@ -289,42 +304,53 @@ const select = async (id) => {
   await load(id);
 };
 
-const update = async (payload, done) => {
-  busy.value = true;
-  showMessage('');
+// 대상 과제 id를 인자로 받는다. 저장하는 동안 선택이 바뀌었으면 지금 보는 과제의 메시지·상세는 건드리지 않는다.
+const update = async (id, payload, done) => {
+  if (savingIds.value[id]) return false;
+  markInFlight(savingIds, id, true);
+  if (selectedId.value === id) showMessage('');
   try {
-    await updateAdminScenario(selectedId.value, payload);
-    await Promise.all([load(selectedId.value), loadList()]);
-    showMessage(done);
+    await updateAdminScenario(id, payload);
+    await Promise.all([selectedId.value === id ? load(id) : null, loadList()]);
+    if (selectedId.value === id) showMessage(done);
     return true;
   } catch (error) {
-    showMessage(error.message || '저장하지 못했습니다.', true);
+    if (selectedId.value === id) showMessage(error.message || '저장하지 못했습니다.', true);
     return false;
   } finally {
-    busy.value = false;
+    markInFlight(savingIds, id, false);
   }
 };
 
-const saveBasics = () => update({ title: edit.title.trim(), timeLimitMinutes: edit.timeLimitMinutes }, '저장했습니다.');
-const setPublished = (published) => update({ published }, published ? '공개했습니다.' : '비공개로 전환했습니다.');
+const currentId = () => detail.value?.id ?? selectedId.value;
+const saveBasics = () => update(currentId(), { title: edit.title.trim(), timeLimitMinutes: edit.timeLimitMinutes }, '저장했습니다.');
+const setPublished = (published) => update(currentId(), { published }, published ? '공개했습니다.' : '비공개로 전환했습니다.');
 
+// 시작할 때 id와 입력을 잡아 둔다. 생성(몇 분) 중 다른 과제를 골랐다면 결과와 오류를 버린다.
 const generateRubricDraft = async () => {
-  if (rubricGenerating.value) return;
-  rubricGenerating.value = true;
+  const id = selectedId.value;
+  if (id == null || generatingIds.value[id]) return;
+  const source = { sourceText: rubricForm.sourceText, files: [...rubricForm.files] };
+  markInFlight(generatingIds, id, true);
   rubricError.value = '';
   rubricDraft.value = null;
   try {
-    rubricDraft.value = await generateRubric(selectedId.value, await sourcePayload(rubricForm));
+    const res = await generateRubric(id, await sourcePayload(source));
+    if (selectedId.value === id) rubricDraft.value = { ...res, scenarioId: id };
   } catch (error) {
-    rubricError.value = error.message || '채점기준을 생성하지 못했습니다.';
+    if (selectedId.value === id) rubricError.value = error.message || '채점기준을 생성하지 못했습니다.';
   } finally {
-    rubricGenerating.value = false;
+    markInFlight(generatingIds, id, false);
   }
 };
 
-// 응답의 scenario(채점기준이 반영된 과제 본문)를 body로 PUT한다.
+// 응답의 scenario(채점기준이 반영된 과제 본문)를 초안을 만든 과제의 body로 PUT한다.
 const saveRubric = async () => {
-  if (await update({ body: rubricDraft.value.scenario }, '채점기준을 저장했습니다.')) rubricDraft.value = null;
+  const draft = rubricDraft.value;
+  if (!draft) return;
+  if (await update(draft.scenarioId, { body: draft.scenario }, '채점기준을 저장했습니다.') && rubricDraft.value === draft) {
+    rubricDraft.value = null;
+  }
 };
 
 onMounted(loadList);
